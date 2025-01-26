@@ -13,7 +13,7 @@ export default function Login() {
           <div className="card-body">
             <LoginForm />
             <div className="text-center mt-4">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="link link-primary">
                 Register here
               </Link>
