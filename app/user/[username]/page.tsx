@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useParams } from "next/navigation"
 
 interface Meeting {
   id: number
@@ -10,6 +11,7 @@ interface Meeting {
 }
 
 export default function UserDashboard() {
+  const { username } = useParams()
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [newMeeting, setNewMeeting] = useState({ personMet: "", medicineDiscussed: "", notes: "" })
 
@@ -21,7 +23,7 @@ export default function UserDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">User Dashboard</h1>
+      <h1 className="text-3xl font-bold text-center">Welcome, {username}!</h1>
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">Add Meeting Details</h2>

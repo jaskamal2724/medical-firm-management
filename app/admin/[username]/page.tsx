@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useParams } from "next/navigation"
 
 interface User {
   id: number
@@ -9,6 +10,7 @@ interface User {
 }
 
 export default function AdminDashboard() {
+  const { username } = useParams()
   const [users, setUsers] = useState<User[]>([
     { id: 1, name: "John Doe", email: "john@example.com" },
     { id: 2, name: "Jane Smith", email: "jane@example.com" },
@@ -36,7 +38,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold text-center">Welcome, {username}!</h1>
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">User Management</h2>

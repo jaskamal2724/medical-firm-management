@@ -11,10 +11,10 @@ const LoginForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // In a real application, you would validate credentials here
-    if (username === "admin" && password === "admin") {
-      router.push("/admin")
-    } else if (username === "user" && password === "user") {
-      router.push("/user")
+    if (username === "jassi" && password === "admin") {
+      router.push(`/admin/${username}`)
+    } else if (username === "jassi" && password === "user") {
+      router.push(`/user/${username}`)
     } else {
       alert("Invalid credentials")
     }
