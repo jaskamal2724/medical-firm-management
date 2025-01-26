@@ -16,11 +16,17 @@ const Navigation = () => {
           Medical Firm
         </Link>
       </div>
+      
       <div className="flex-none">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <Link href="/" className={pathname === "/" ? "active" : ""}>
-              Home
+            <Link href="/register" className={pathname === "/register" ? "active" : ""}>
+              Register
+            </Link>
+          </li>
+          <li>
+            <Link href="/login" className={pathname === "/login" ? "active" : ""}>
+              Login
             </Link>
           </li>
           {/* <li>
