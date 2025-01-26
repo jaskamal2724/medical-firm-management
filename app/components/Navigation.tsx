@@ -12,11 +12,11 @@ const Navigation = () => {
   return (
     <div className="navbar bg-base-100 shadow-lg">
       <div className="flex-1">
-        <Link href="/" className="btn btn-ghost normal-case text-xl">
+        <Link href="/" className="btn btn-ghost normal-case text-lg md:text-xl">
           Medical Firm
         </Link>
       </div>
-      
+
       <div className="flex-none">
         <ul className="menu menu-horizontal px-1">
           <li>
