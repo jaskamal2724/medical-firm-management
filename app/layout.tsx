@@ -24,7 +24,6 @@ export default function RootLayout({
             <main className="container mx-auto mt-4 p-4">{children}</main>
           </div>
         </ThemeProvider>
-        <script src="https://cdn.lordicon.com/lordicon.js"></script>
       </body>
     </html>
   )
