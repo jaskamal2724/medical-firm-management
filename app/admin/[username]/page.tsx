@@ -34,7 +34,7 @@ export default function AdminDashboard() {
   const fetchedMeetings: Meeting[] = [
     {
       id: 1,
-      userId: "1",
+      userId: "John",
       personMet: "Dr. Brown",
       medicineDiscussed: "Aspirin",
       notes: "Follow-up in 2 weeks",
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
     },
     {
       id: 2,
-      userId: "1",
+      userId: "John",
       personMet: "Nurse Johnson",
       medicineDiscussed: "Ibuprofen",
       notes: "Patient reported improvement",
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     },
     {
       id: 3,
-      userId: "2",
+      userId: "Jane",
       personMet: "Dr. Smith",
       medicineDiscussed: "Amoxicillin",
       notes: "Prescribed for 7 days",
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
     },
     {
       id: 4,
-      userId: "2",
+      userId: "Jane",
       personMet: "Pharmacist Lee",
       medicineDiscussed: "Vitamin D",
       notes: "Recommended daily supplement",

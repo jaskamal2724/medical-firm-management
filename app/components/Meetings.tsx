@@ -114,7 +114,7 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
                   className="cursor-pointer hover:bg-gray-50"
                   onClick={() => toggleSort("userId")}
                 >
-                  User ID <SortIcon field="userId" />
+                  User Name <SortIcon field="userId" />
                 </TableHead>
               )}
             </TableRow>
