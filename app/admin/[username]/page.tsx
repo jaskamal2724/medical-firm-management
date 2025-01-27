@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import ExcelJS from "exceljs"
+import MeetingsTable from "@/app/components/Meetings"
 
 interface User {
   id: number
@@ -13,7 +14,7 @@ interface User {
 
 interface Meeting {
   id: number
-  userId: number
+  userId: string
   personMet: string
   medicineDiscussed: string
   notes: string
@@ -30,42 +31,44 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [meetings, setMeetings] = useState<Meeting[]>([])
 
+  const fetchedMeetings: Meeting[] = [
+    {
+      id: 1,
+      userId: "1",
+      personMet: "Dr. Brown",
+      medicineDiscussed: "Aspirin",
+      notes: "Follow-up in 2 weeks",
+      date: "2023-06-01",
+    },
+    {
+      id: 2,
+      userId: "1",
+      personMet: "Nurse Johnson",
+      medicineDiscussed: "Ibuprofen",
+      notes: "Patient reported improvement",
+      date: "2023-06-03",
+    },
+    {
+      id: 3,
+      userId: "2",
+      personMet: "Dr. Smith",
+      medicineDiscussed: "Amoxicillin",
+      notes: "Prescribed for 7 days",
+      date: "2023-06-02",
+    },
+    {
+      id: 4,
+      userId: "2",
+      personMet: "Pharmacist Lee",
+      medicineDiscussed: "Vitamin D",
+      notes: "Recommended daily supplement",
+      date: "2023-06-04",
+    },
+  ]
+
   useEffect(() => {
     // Simulating fetching meetings data
-    const fetchedMeetings: Meeting[] = [
-      {
-        id: 1,
-        userId: 1,
-        personMet: "Dr. Brown",
-        medicineDiscussed: "Aspirin",
-        notes: "Follow-up in 2 weeks",
-        date: "2023-06-01",
-      },
-      {
-        id: 2,
-        userId: 1,
-        personMet: "Nurse Johnson",
-        medicineDiscussed: "Ibuprofen",
-        notes: "Patient reported improvement",
-        date: "2023-06-03",
-      },
-      {
-        id: 3,
-        userId: 2,
-        personMet: "Dr. Smith",
-        medicineDiscussed: "Amoxicillin",
-        notes: "Prescribed for 7 days",
-        date: "2023-06-02",
-      },
-      {
-        id: 4,
-        userId: 2,
-        personMet: "Pharmacist Lee",
-        medicineDiscussed: "Vitamin D",
-        notes: "Recommended daily supplement",
-        date: "2023-06-04",
-      },
-    ]
+    
     setMeetings(fetchedMeetings)
   }, [])
 
@@ -87,7 +90,7 @@ export default function AdminDashboard() {
     setUsers(users.filter((user) => user.id !== id))
   }
 
-  const downloadUserMeetings = async (userId: number) => {
+  const downloadUserMeetings = async (userId: string) => {
     const userMeetings = meetings.filter((meeting) => meeting.userId === userId)
 
     const workbook = new ExcelJS.Workbook()
@@ -113,11 +116,10 @@ export default function AdminDashboard() {
     link.click()
   }
 
-  
-
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Welcome, Admin {username}!</h1>
+      <h1 className="text-3xl font-bold text-center">Welcome, Admin {username}!</h1>
+
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">User Management</h2>
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
                   <button onClick={() => deleteUser(user.id)} className="btn btn-error btn-sm mr-2">
                     Delete
                   </button>
-                  <button onClick={() => downloadUserMeetings(user.id)} className="btn btn-info btn-sm">
+                  <button onClick={() => downloadUserMeetings("user.id")} className="btn btn-info btn-sm">
                     Download Meetings
                   </button>
                 </td>
@@ -196,7 +198,7 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      
+      <MeetingsTable meetings={fetchedMeetings}/>
     </div>
   )
 }
