@@ -23,7 +23,7 @@ export default function UserDashboard() {
     feedback: "",
     location: ""
   })
-  const [locationError, setLocationError] = useState<string | null>(null)
+  // const [locationError, setLocationError] = useState<string | null>(null)
 
   // const getLocation = async () => {
   //   if ("geolocation" in navigator) {
@@ -166,9 +166,9 @@ export default function UserDashboard() {
                   Get Location
                 </button> */}
               </div>
-              {locationError && (
+              {/* {locationError && (
                 <p className="text-error text-sm mt-1">{locationError}</p>
-              )}
+              )} */}
             </div>
 
             <button type="submit" className="btn btn-primary w-full">
