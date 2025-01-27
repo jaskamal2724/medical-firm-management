@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import ExcelJS from "exceljs"
 import MeetingsTable from "@/app/components/Meetings"
+import { Pencil,  Trash2, Download} from "lucide-react"
 
 interface User {
   id: number
@@ -182,14 +183,15 @@ export default function AdminDashboard() {
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>
+                  
                   <button onClick={() => setEditingUser(user)} className="btn btn-warning btn-sm mr-2">
-                    Edit
+                    <Pencil></Pencil>
                   </button>
                   <button onClick={() => deleteUser(user.id)} className="btn btn-error btn-sm mr-2">
-                    Delete
+                    <Trash2></Trash2>
                   </button>
                   <button onClick={() => downloadUserMeetings("user.id")} className="btn btn-info btn-sm">
-                    Download Meetings
+                    <Download></Download>
                   </button>
                 </td>
               </tr>
