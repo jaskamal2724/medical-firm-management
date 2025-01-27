@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import ExcelJS from "exceljs"
-// import { BarChart, PieChart } from "@/app/components/ui/chart"
 
 interface User {
   id: number
@@ -114,21 +113,7 @@ export default function AdminDashboard() {
     link.click()
   }
 
-  // Prepare data for charts
-  const meetingsPerUser = users.map((user) => ({
-    name: user.name,
-    meetings: meetings.filter((meeting) => meeting.userId === user.id).length,
-  }))
-
-  const medicinesDiscussed = Object.entries(
-    meetings.reduce(
-      (acc, meeting) => {
-        acc[meeting.medicineDiscussed] = (acc[meeting.medicineDiscussed] || 0) + 1
-        return acc
-      },
-      {} as Record<string, number>,
-    ),
-  ).map(([name, value]) => ({ name, value }))
+  
 
   return (
     <div className="space-y-6">
@@ -211,25 +196,7 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Meetings per User</h2>
-            <BarChart data={meetingsPerUser} index="name" categories={["meetings"]} colors={["blue"]} yAxisWidth={40} />
-          </div>
-        </div>
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Medicines Discussed</h2>
-            <PieChart
-              data={medicinesDiscussed}
-              index="name"
-              category="value"
-              colors={["red", "green", "blue", "yellow", "purple"]}
-            />
-          </div>
-        </div>
-      </div> */}
+      
     </div>
   )
 }

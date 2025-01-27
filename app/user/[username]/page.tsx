@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams } from "next/navigation"
 import { motion } from "framer-motion"
 
@@ -25,46 +25,46 @@ export default function UserDashboard() {
   })
   const [locationError, setLocationError] = useState<string | null>(null)
 
-  const getLocation = async () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
+  // const getLocation = async () => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         const { latitude, longitude } = position.coords;
   
-          try {
-            // Call a reverse geocoding API to get a human-readable address
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_API_KEY`
-            );
-            const data = await response.json();
+  //         try {
+  //           // Call a reverse geocoding API to get a human-readable address
+  //           const response = await fetch(
+  //             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_API_KEY`
+  //           );
+  //           const data = await response.json();
   
-            if (data.status === "OK") {
-              const address = data.results[0]?.formatted_address || "Unknown location";
+  //           if (data.status === "OK") {
+  //             const address = data.results[0]?.formatted_address || "Unknown location";
   
-              // Update your state with the full address
-              setNewMeeting((prev) => ({
-                ...prev,
-                location: address,
-              }));
-              setLocationError(null);
-            } else {
-              setLocationError("Could not retrieve address");
-              console.error("Geocoding error:", data.status);
-            }
-          } catch (error) {
-            setLocationError("Error fetching location data");
-            console.error("Fetch error:", error);
-          }
-        },
-        (error) => {
-          setLocationError("Could not retrieve location");
-          console.error("Location error:", error);
-        }
-      );
-    } else {
-      setLocationError("Geolocation not supported");
-    }
-  };
+  //             // Update your state with the full address
+  //             setNewMeeting((prev) => ({
+  //               ...prev,
+  //               location: address,
+  //             }));
+  //             setLocationError(null);
+  //           } else {
+  //             setLocationError("Could not retrieve address");
+  //             console.error("Geocoding error:", data.status);
+  //           }
+  //         } catch (error) {
+  //           setLocationError("Error fetching location data");
+  //           console.error("Fetch error:", error);
+  //         }
+  //       },
+  //       (error) => {
+  //         setLocationError("Could not retrieve location");
+  //         console.error("Location error:", error);
+  //       }
+  //     );
+  //   } else {
+  //     setLocationError("Geolocation not supported");
+  //   }
+  // };
   
 
   const addMeeting = (e: React.FormEvent) => {
