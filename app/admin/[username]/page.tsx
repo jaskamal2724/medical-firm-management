@@ -70,7 +70,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     // Simulating fetching meetings data
     setMeetings(fetchedMeetings)
-  }, [fetchedMeetings])
+  }, [])
 
   const addUser = (e: React.FormEvent) => {
     e.preventDefault()
