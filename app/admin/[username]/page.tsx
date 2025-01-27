@@ -1,27 +1,79 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import ExcelJS from "exceljs"
+// import { BarChart, PieChart } from "@/app/components/ui/chart"
 
 interface User {
   id: number
   name: string
   email: string
+  password: string
+}
+
+interface Meeting {
+  id: number
+  userId: number
+  personMet: string
+  medicineDiscussed: string
+  notes: string
+  date: string
 }
 
 export default function AdminDashboard() {
   const { username } = useParams()
   const [users, setUsers] = useState<User[]>([
-    { id: 1, name: "John Doe", email: "john@example.com" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com" },
+    { id: 1, name: "John Doe", email: "john@example.com", password: "password123" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", password: "password456" },
   ])
-  const [newUser, setNewUser] = useState({ name: "", email: "" })
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "" })
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [meetings, setMeetings] = useState<Meeting[]>([])
+
+  useEffect(() => {
+    // Simulating fetching meetings data
+    const fetchedMeetings: Meeting[] = [
+      {
+        id: 1,
+        userId: 1,
+        personMet: "Dr. Brown",
+        medicineDiscussed: "Aspirin",
+        notes: "Follow-up in 2 weeks",
+        date: "2023-06-01",
+      },
+      {
+        id: 2,
+        userId: 1,
+        personMet: "Nurse Johnson",
+        medicineDiscussed: "Ibuprofen",
+        notes: "Patient reported improvement",
+        date: "2023-06-03",
+      },
+      {
+        id: 3,
+        userId: 2,
+        personMet: "Dr. Smith",
+        medicineDiscussed: "Amoxicillin",
+        notes: "Prescribed for 7 days",
+        date: "2023-06-02",
+      },
+      {
+        id: 4,
+        userId: 2,
+        personMet: "Pharmacist Lee",
+        medicineDiscussed: "Vitamin D",
+        notes: "Recommended daily supplement",
+        date: "2023-06-04",
+      },
+    ]
+    setMeetings(fetchedMeetings)
+  }, [])
 
   const addUser = (e: React.FormEvent) => {
     e.preventDefault()
     setUsers([...users, { ...newUser, id: users.length + 1 }])
-    setNewUser({ name: "", email: "" })
+    setNewUser({ name: "", email: "", password: "" })
   }
 
   const updateUser = (e: React.FormEvent) => {
@@ -36,9 +88,51 @@ export default function AdminDashboard() {
     setUsers(users.filter((user) => user.id !== id))
   }
 
+  const downloadUserMeetings = async (userId: number) => {
+    const userMeetings = meetings.filter((meeting) => meeting.userId === userId)
+
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet("Meetings")
+
+    worksheet.columns = [
+      { header: "ID", key: "id", width: 10 },
+      { header: "Person Met", key: "personMet", width: 20 },
+      { header: "Medicine Discussed", key: "medicineDiscussed", width: 20 },
+      { header: "Notes", key: "notes", width: 30 },
+      { header: "Date", key: "date", width: 15 },
+    ]
+
+    userMeetings.forEach((meeting) => {
+      worksheet.addRow(meeting)
+    })
+
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+    const link = document.createElement("a")
+    link.href = window.URL.createObjectURL(blob)
+    link.download = `user_${userId}_meetings.xlsx`
+    link.click()
+  }
+
+  // Prepare data for charts
+  const meetingsPerUser = users.map((user) => ({
+    name: user.name,
+    meetings: meetings.filter((meeting) => meeting.userId === user.id).length,
+  }))
+
+  const medicinesDiscussed = Object.entries(
+    meetings.reduce(
+      (acc, meeting) => {
+        acc[meeting.medicineDiscussed] = (acc[meeting.medicineDiscussed] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>,
+    ),
+  ).map(([name, value]) => ({ name, value }))
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-center">Welcome, {username}!</h1>
+      <h1 className="text-3xl font-bold">Welcome, Admin {username}!</h1>
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">User Management</h2>
@@ -63,6 +157,18 @@ export default function AdminDashboard() {
                 editingUser
                   ? setEditingUser({ ...editingUser, email: e.target.value })
                   : setNewUser({ ...newUser, email: e.target.value })
+              }
+              className="input input-bordered flex-1"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={editingUser ? editingUser.password : newUser.password}
+              onChange={(e) =>
+                editingUser
+                  ? setEditingUser({ ...editingUser, password: e.target.value })
+                  : setNewUser({ ...newUser, password: e.target.value })
               }
               className="input input-bordered flex-1"
               required
@@ -92,8 +198,11 @@ export default function AdminDashboard() {
                   <button onClick={() => setEditingUser(user)} className="btn btn-warning btn-sm mr-2">
                     Edit
                   </button>
-                  <button onClick={() => deleteUser(user.id)} className="btn btn-error btn-sm">
+                  <button onClick={() => deleteUser(user.id)} className="btn btn-error btn-sm mr-2">
                     Delete
+                  </button>
+                  <button onClick={() => downloadUserMeetings(user.id)} className="btn btn-info btn-sm">
+                    Download Meetings
                   </button>
                 </td>
               </tr>
@@ -101,6 +210,26 @@ export default function AdminDashboard() {
           </tbody>
         </table>
       </div>
+
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card bg-base-200 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Meetings per User</h2>
+            <BarChart data={meetingsPerUser} index="name" categories={["meetings"]} colors={["blue"]} yAxisWidth={40} />
+          </div>
+        </div>
+        <div className="card bg-base-200 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Medicines Discussed</h2>
+            <PieChart
+              data={medicinesDiscussed}
+              index="name"
+              category="value"
+              colors={["red", "green", "blue", "yellow", "purple"]}
+            />
+          </div>
+        </div>
+      </div> */}
     </div>
   )
 }
