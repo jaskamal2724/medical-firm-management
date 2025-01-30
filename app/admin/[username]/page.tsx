@@ -1,81 +1,100 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect} from "react"
 import { useParams } from "next/navigation"
 import ExcelJS from "exceljs"
 import MeetingsTable from "@/app/components/Meetings"
 import { Pencil,  Trash2, Download} from "lucide-react"
+import { collection, addDoc, getDocs } from "firebase/firestore"
+import { db } from "@/app/firebase"
+import bcrypt from "bcryptjs"
+import {nanoid} from "nanoid"
 
 interface User {
-  id: number
+  id: string
   name: string
   email: string
   password: string
+  data:{[key:string]:string}[]
+  role:string
 }
 
 interface Meeting {
-  id: number
-  userId: string
-  personMet: string
-  medicineDiscussed: string
-  notes: string
-  date: string
+  medicine: string;
+  id: string;
+  doctor: string;
+  hospital: string;
+  feedback: string;
+  location: string;
+  date:number,
+  name:string
 }
 
 export default function AdminDashboard() {
   const { username } = useParams()
   const [users, setUsers] = useState<User[]>([
-    { id: 1, name: "John Doe", email: "john@example.com", password: "password123" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", password: "password456" },
+    
   ])
+
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "" })
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [meetings, setMeetings] = useState<Meeting[]>([])
 
-  const fetchedMeetings: Meeting[] = [
-    {
-      id: 1,
-      userId: "John",
-      personMet: "Dr. Brown",
-      medicineDiscussed: "Aspirin",
-      notes: "Follow-up in 2 weeks",
-      date: "2023-06-01",
-    },
-    {
-      id: 2,
-      userId: "John",
-      personMet: "Nurse Johnson",
-      medicineDiscussed: "Ibuprofen",
-      notes: "Patient reported improvement",
-      date: "2023-06-03",
-    },
-    {
-      id: 3,
-      userId: "Jane",
-      personMet: "Dr. Smith",
-      medicineDiscussed: "Amoxicillin",
-      notes: "Prescribed for 7 days",
-      date: "2023-06-02",
-    },
-    {
-      id: 4,
-      userId: "Jane",
-      personMet: "Pharmacist Lee",
-      medicineDiscussed: "Vitamin D",
-      notes: "Recommended daily supplement",
-      date: "2023-06-04",
-    },
-  ]
+  const [fetchedMeetings, setFetchedMeetings]=useState<Meeting[]>([])
+
+  const allusers = async()=>{
+    const usersCollection = collection(db, "users");
+    const querySnapshot = await getDocs(usersCollection);
+    const usersData: User[]= []
+    querySnapshot.forEach((doc) => {
+      const data = doc.data(); // Use the `data()` method to access document data
+      
+      
+      if(!data.meetings){
+        usersData.push({
+          id: nanoid(),
+          name: data.name,
+          email: data.email,
+          password: "",
+          data:[],
+          role:"user"
+        })
+        
+        setUsers(usersData)
+      }
+      else{
+        const response = data.meetings
+        console.log(...response)
+        setFetchedMeetings((prev)=>[...prev, ...response])
+      }
+      
+    });
+  }
+  
 
   useEffect(() => {
     // Simulating fetching meetings data
+    allusers()
     setMeetings(fetchedMeetings)
   }, [])
 
-  const addUser = (e: React.FormEvent) => {
+  const addUser = async(e: React.FormEvent) => {
     e.preventDefault()
-    setUsers([...users, { ...newUser, id: users.length + 1 }])
-    setNewUser({ name: "", email: "", password: "" })
+    try {
+      const docRef = await addDoc(collection(db,"users"),{
+        name:newUser.name,
+        email:newUser.email,
+        password: await bcrypt.hash(newUser.password,10),
+        data:[],
+        role:"user"
+      })
+      // console.log("user added",docRef.id)
+      setUsers([...users, { ...newUser, id: String(users.length + 1), data:[],role:"user" }])
+      setNewUser({ name: "", email: "", password: "" })
+    } 
+    catch (error) {
+      console.error("error adding user",error)
+    }
   }
 
   const updateUser = (e: React.FormEvent) => {
@@ -86,12 +105,12 @@ export default function AdminDashboard() {
     }
   }
 
-  const deleteUser = (id: number) => {
+  const deleteUser = (id: string) => {
     setUsers(users.filter((user) => user.id !== id))
   }
 
   const downloadUserMeetings = async (userId: string) => {
-    const userMeetings = meetings.filter((meeting) => meeting.userId === userId)
+    const userMeetings = meetings.filter((meeting) => meeting.id === userId)
 
     const workbook = new ExcelJS.Workbook()
     const worksheet = workbook.addWorksheet("Meetings")
@@ -167,7 +186,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {users.length>0 && <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>
             <tr>
@@ -198,6 +217,7 @@ export default function AdminDashboard() {
           </tbody>
         </table>
       </div>
+      }
 
       <MeetingsTable meetings={fetchedMeetings}/>
     </div>

@@ -12,14 +12,18 @@ import {
 import { motion } from "framer-motion"
 import { Input } from "@/components/ui/input"
 import { Search, SortAsc, SortDesc } from "lucide-react"
+import { nanoid } from "nanoid"
+
 
 interface Meeting {
-  id: number
-  userId: string
-  personMet: string
-  medicineDiscussed: string
-  notes: string
-  date: string
+  medicine: string;
+  id: string;
+  doctor: string;
+  hospital: string;
+  feedback: string;
+  location: string;
+  date:number;
+  name:string
 }
 
 interface MeetingsTableProps {
@@ -32,9 +36,12 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [searchTerm, setSearchTerm] = useState("")
 
+  // to get document name 
+  
+
   const filteredMeetings = meetings
     .filter(meeting => 
-      userId ? meeting.userId === userId : true
+      userId ? meeting.id === userId : true
     )
     .filter(meeting =>
       Object.values(meeting).some(value =>
@@ -98,41 +105,43 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
               </TableHead>
               <TableHead 
                 className="cursor-pointer hover:bg-gray-50"
-                onClick={() => toggleSort("personMet")}
+                onClick={() => toggleSort("doctor")}
               >
-                Person Met <SortIcon field="personMet" />
+                Doctor <SortIcon field="doctor" />
               </TableHead>
               <TableHead 
                 className="cursor-pointer hover:bg-gray-50"
-                onClick={() => toggleSort("medicineDiscussed")}
+                onClick={() => toggleSort("medicine")}
               >
-                Medicine <SortIcon field="medicineDiscussed" />
+                Medicine <SortIcon field="medicine" />
               </TableHead>
               <TableHead>Notes</TableHead>
               {!userId && (
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => toggleSort("userId")}
+                  onClick={() => toggleSort("id")}
                 >
-                  User Name <SortIcon field="userId" />
+                  Location <SortIcon field="id" />
                 </TableHead>
               )}
+              <TableHead>Person</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredMeetings.map((meeting) => (
               <motion.tr
-                key={meeting.id}
+                key={nanoid()}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="hover:bg-gray-50"
               >
                 <TableCell>{new Date(meeting.date).toLocaleDateString()}</TableCell>
-                <TableCell className="font-medium">{meeting.personMet}</TableCell>
-                <TableCell>{meeting.medicineDiscussed}</TableCell>
-                <TableCell>{meeting.notes}</TableCell>
-                {!userId && <TableCell>{meeting.userId}</TableCell>}
+                <TableCell className="font-medium">{meeting.doctor}</TableCell>
+                <TableCell>{meeting.medicine}</TableCell>
+                <TableCell>{meeting.feedback}</TableCell>
+                {!userId && <TableCell>{meeting.location}</TableCell>}
+                <TableCell>{meeting.name}</TableCell>
               </motion.tr>
             ))}
           </TableBody>

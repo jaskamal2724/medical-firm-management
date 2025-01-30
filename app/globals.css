@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 .bg-dot-pattern {
   background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
   background-size: 20px 20px;

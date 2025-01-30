@@ -2,6 +2,9 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { auth } from "../firebase"
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { NextResponse } from "next/server"
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -21,21 +24,29 @@ const RegistrationForm = () => {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
-      return
+      return NextResponse.json(
+        {message:"Filed Donot match"}
+      )
     }
 
     // Here you would typically send the registration data to your backend
-    // For this example, we'll just simulate a successful registration
-    console.log("Registration data:", formData)
+    // For this example, we'll just simulate a successful registratiom
 
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+    const user = userCredential.user
+    await updateProfile(user,{displayName:formData.username})
+
+    // console.log("Registration data:", formData)
     // Redirect to login page after successful registration
-    router.push("/login")
+    if(user){
+      router.push("/login")
+    }
   }
 
   return (

@@ -14,7 +14,7 @@ export default function Login() {
             <LoginForm />
             <div className="text-center mt-4">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="link link-primary">
+              <Link href="/secure-register" className="link link-primary">
                 Register here
               </Link>
             </div>

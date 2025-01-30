@@ -2,8 +2,9 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import Navigation from "./components/Navigation"
 import ThemeProvider from "./components/ThemeProvider"
+import { AuthProvider } from "./components/AuthContext"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], preload:false })
 
 export const metadata = {
   title: "Medical Firm Management",
@@ -18,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <AuthProvider>
         <ThemeProvider>
           <div className="min-h-screen bg-base-100 text-base-content">
             <Navigation />
             <main className="container mx-auto mt-4 p-4">{children}</main>
           </div>
         </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

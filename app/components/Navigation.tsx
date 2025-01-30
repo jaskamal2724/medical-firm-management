@@ -1,11 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 import { useTheme } from "./ThemeProvider"
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid"
+import { useAuth } from "./AuthContext"
+import { signOut } from "firebase/auth"
+import { auth } from "../firebase"
 
 const Navigation = () => {
+  const {user}= useAuth()
+
+  const handlesignout=()=>{
+    signOut(auth).then(()=>{
+      console.log("signout success")
+      redirect("/login")
+    })
+  }
+
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
 
@@ -23,16 +35,16 @@ const Navigation = () => {
       </div>
       <div className="flex-none">
         <ul className="menu menu-horizontal px-1">
-          <li>
+          {/* <li>
             <Link href="/register" className={isActive("/register") ? "active" : ""}>
               Register
             </Link>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <Link href="/login" className={isActive("/login") ? "active" : ""}>
               Login
             </Link>
-          </li>
+          </li> */}
           {/* <li>
             <Link href="/admin" className={isActive("/admin") ? "active" : ""}>
               Admin
@@ -43,6 +55,10 @@ const Navigation = () => {
               User
             </Link>
           </li> */}
+          <li>
+            {user && <p onClick={handlesignout}>sign out</p>}
+            {!user && <p>sign in</p>}
+          </li>
         </ul>
         <button onClick={toggleTheme} className="btn btn-ghost btn-circle">
           {theme === "light" ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
