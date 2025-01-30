@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { redirect, usePathname } from "next/navigation"
+import { redirect} from "next/navigation"
 import { useTheme } from "./ThemeProvider"
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid"
 import { useAuth } from "./AuthContext"
@@ -18,7 +18,7 @@ const Navigation = () => {
     })
   }
 
-  const pathname = usePathname()
+  
   const { theme, toggleTheme } = useTheme()
 
   // const isActive = (path: string) => {

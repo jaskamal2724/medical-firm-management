@@ -49,7 +49,7 @@ const LoginForm = () => {
         
       } 
       catch (error) {
-        
+        console.log("cant redirect to user or admin",error)
       }
     }
     
