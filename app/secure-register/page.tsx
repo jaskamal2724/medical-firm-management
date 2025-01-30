@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 
-const page = () => {
+const Secureregister = () => {
   const [code, setCode] = useState("");
   const [showAlert, setShowAlert]=useState(false)
   
@@ -54,4 +54,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Secureregister;

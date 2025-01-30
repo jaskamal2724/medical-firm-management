@@ -37,6 +37,7 @@ const LoginForm = () => {
     
     if(role=="user"){
       router.push(`/user/${name}`)
+      return data
     }
     else{
       try {

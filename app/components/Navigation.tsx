@@ -21,10 +21,10 @@ const Navigation = () => {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
 
-  const isActive = (path: string) => {
-    if (path === "/") return pathname === path
-    return pathname.startsWith(path)
-  }
+  // const isActive = (path: string) => {
+  //   if (path === "/") return pathname === path
+  //   return pathname.startsWith(path)
+  // }
 
   return (
     <div className="navbar bg-base-100 shadow-lg">

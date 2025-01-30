@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         data:[],
         role:"user"
       })
-      // console.log("user added",docRef.id)
+      console.log("user added",docRef.id)
       setUsers([...users, { ...newUser, id: String(users.length + 1), data:[],role:"user" }])
       setNewUser({ name: "", email: "", password: "" })
     } 

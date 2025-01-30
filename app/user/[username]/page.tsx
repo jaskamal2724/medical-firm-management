@@ -133,7 +133,11 @@ export default function UserDashboard() {
         await setDoc(useRef, { meetings: [newMeeting] });
         console.log("New document created with meeting");
       }
-    } catch (error) {}
+    } 
+    catch (error) {
+      console.log("Error adding document ",error)
+    }
+
     setNewMeeting({
       doctor: "",
       hospital: "",
