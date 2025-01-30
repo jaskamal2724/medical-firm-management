@@ -23,6 +23,7 @@ const Secureregister = () => {
   return (
     <div className="flex flex-col justify-center items-center">
       <Input
+        type="password"
         onInput={(e: React.FormEvent<HTMLInputElement>) =>
           setCode((e.target as HTMLInputElement).value)
         }
