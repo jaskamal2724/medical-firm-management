@@ -103,7 +103,7 @@ export default function UserDashboard() {
       }
     };
     fetchmeetings();
-  }, [meetings]);
+  }, [newMeeting]);
 
   const addMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
