@@ -141,7 +141,7 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
                 <TableCell>{meeting.medicine}</TableCell>
                 <TableCell>{meeting.feedback}</TableCell>
                 {!userId && <TableCell>{meeting.location}</TableCell>}
-                <TableCell>{meeting.name}</TableCell>
+                <TableCell>{meeting.name.replace(/[^a-zA-Z\s]/g, " ")}</TableCell>
               </motion.tr>
             ))}
           </TableBody>
