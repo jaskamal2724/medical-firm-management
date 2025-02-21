@@ -49,8 +49,6 @@ export default function UserDashboard() {
   });
 
 
-  
-
   // Fetch meetings and doctors data
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +70,7 @@ export default function UserDashboard() {
     };
 
     fetchData();
-  }, [username]); // Depend on username, not newMeeting, to avoid infinite loop
+  }, []); // Depend on username, not newMeeting, to avoid infinite loop
 
 
 
