@@ -7,9 +7,7 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
 import { nanoid } from "nanoid";
-
 
 
 interface Meeting {
@@ -23,7 +21,6 @@ interface Meeting {
   name: string;
 }
 
-
 interface Doctor {
   id: string;
   name: string;
@@ -33,11 +30,19 @@ interface Doctor {
   location: string;
 }
 
+interface Medicine {
+  id: string;
+  name: string;
+  description: string;
+  manufacturer: string;
+  stock: number;
+}
+
 export default function UserDashboard() {
   const { username } = useParams();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]); // State for doctors list
-
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]); // State for medicines list
   const [newMeeting, setNewMeeting] = useState({
     doctor: "",
     hospital: "",
@@ -48,8 +53,12 @@ export default function UserDashboard() {
     name: `${username}`,
   });
 
+  // Visibility of add form
+  const [showform, setShowform] = useState(false);
+  const handleshow = () => setShowform(!showform);
+  const handleremove = () => setShowform(!showform);
 
-  // Fetch meetings and doctors data
+  // Fetch meetings, doctors, and medicines data
   useEffect(() => {
     const fetchData = async () => {
       // Fetch meetings
@@ -67,13 +76,17 @@ export default function UserDashboard() {
         const doctorsData = doctorsSnap.data().doctors || [];
         setDoctors(doctorsData);
       }
+
+      // Fetch medicines
+      const medicinesRef = doc(db, "medicines", "list");
+      const medicinesSnap = await getDoc(medicinesRef);
+      if (medicinesSnap.exists()) {
+        const medicinesData = medicinesSnap.data().medicines || [];
+        setMedicines(medicinesData);
+      }
     };
-
     fetchData();
-  }, []); // Depend on username, not newMeeting, to avoid infinite loop
-
-
-
+  }, [username]);
 
   const addMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,8 +101,6 @@ export default function UserDashboard() {
     setMeetings([...meetings, updateMeetings]);
 
     try {
-
-
       const userRef = doc(db, "users", `${username}`);
       const userSnap = await getDoc(userRef);
 
@@ -104,8 +115,6 @@ export default function UserDashboard() {
       }
     } catch (error) {
       console.log("Error adding document ", error);
-
-
     }
 
     setNewMeeting({
@@ -115,11 +124,7 @@ export default function UserDashboard() {
       feedback: "",
       location: "",
       date: Date.now(),
-
-
       name: `${username}`,
-
-
     });
   };
 
@@ -131,8 +136,6 @@ export default function UserDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-
-
         Welcome, {username}
       </motion.h1>
 
@@ -188,21 +191,29 @@ export default function UserDashboard() {
               />
             </div>
 
-            {/* Medicine */}
+            {/* Medicine Dropdown */}
             <div className="form-control">
               <label htmlFor="medicine" className="label">
                 <span className="label-text">Medicine Prescribed</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="medicine"
                 value={newMeeting.medicine}
                 onChange={(e) =>
                   setNewMeeting({ ...newMeeting, medicine: e.target.value })
                 }
-                className="input input-bordered w-full"
+                className="select select-bordered w-full"
                 required
-              />
+              >
+                <option value="" disabled>
+                  Select a Medicine
+                </option>
+                {medicines.map((medicine) => (
+                  <option key={medicine.id} value={medicine.name}>
+                    {medicine.name} ({medicine.manufacturer})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Feedback */}
@@ -247,8 +258,6 @@ export default function UserDashboard() {
         </div>
       </div>
 
-
-
       {meetings.length > 0 && (
         <motion.div
           className="card bg-base-200 shadow-xl"
@@ -258,40 +267,39 @@ export default function UserDashboard() {
         >
           <div className="card-body">
             <h2 className="card-title">Meeting History</h2>
-            <div className="space-y-4">
-              {meetings.map((meeting) => (
-                <motion.div
-                  key={nanoid()}
-                  className="bg-base-100 p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="grid grid-cols-2 gap-2">
-                    <p className="font-semibold text-primary">Doctor:</p>
-                    <p>{meeting.doctor || "N/A"}</p>
-
-                    <p className="font-semibold text-primary">Hospital:</p>
-                    <p>{meeting.hospital || "N/A"}</p>
-
-                    <p className="font-semibold text-primary">Medicine:</p>
-                    <p>{meeting.medicine || "N/A"}</p>
-                    <p className="font-semibold text-primary">Feedback:</p>
-                    <p>{meeting.feedback || "N/A"}</p>
-
-                    <p className="font-semibold text-primary">Location:</p>
-                    <p>{meeting.location || "N/A"}</p>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="table w-full">
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Hospital</th>
+                    <th>Medicine</th>
+                    <th>Feedback</th>
+                    <th>Location</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {meetings.map((meeting) => (
+                    <motion.tr
+                      key={nanoid()}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <td>{meeting.doctor || "N/A"}</td>
+                      <td>{meeting.hospital || "N/A"}</td>
+                      <td>{meeting.medicine || "N/A"}</td>
+                      <td>{meeting.feedback || "N/A"}</td>
+                      <td>{meeting.location || "N/A"}</td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </motion.div>
       )}
     </div>
   );
-
-
-
 }

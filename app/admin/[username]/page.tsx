@@ -171,6 +171,9 @@ export default function AdminDashboard() {
         <Link href="/chemists">
         <Button className="text-blue-600 bg-white hover:text-white hover:bg-slate-500" >Chemists</Button>
         </Link>
+        <Link href="/medicine">
+        <Button className="text-blue-600 bg-white hover:text-white hover:bg-slate-500" >Medicines</Button>
+        </Link>
       </div>
 
       <div className="card bg-base-200 shadow-xl">
