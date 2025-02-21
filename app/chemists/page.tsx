@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase"; // Ensure this points to your Firebase config
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+
 import { nanoid } from "nanoid";
 
 interface Chemist {

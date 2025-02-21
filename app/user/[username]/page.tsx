@@ -10,7 +10,7 @@ import Link from "next/link";
 
 import { nanoid } from "nanoid";
 
-import { ClipboardPlus, X } from "lucide-react";
+
 
 interface Meeting {
   medicine: string;
@@ -49,10 +49,7 @@ export default function UserDashboard() {
   });
 
 
-  // Visibility of add form
-  const [showform, setShowform] = useState(false);
-  const handleshow = () => setShowform(!showform);
-  const handleremove = () => setShowform(!showform);
+  
 
   // Fetch meetings and doctors data
   useEffect(() => {
