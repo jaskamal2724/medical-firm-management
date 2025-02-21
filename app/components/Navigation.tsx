@@ -7,6 +7,8 @@ import { MoonIcon, SunIcon } from "@heroicons/react/24/solid"
 import { useAuth } from "./AuthContext"
 import { signOut } from "firebase/auth"
 import { auth } from "../firebase"
+import Image from "next/image"
+
 
 const Navigation = () => {
   const {user}= useAuth()
@@ -30,31 +32,14 @@ const Navigation = () => {
     <div className="navbar bg-base-100 shadow-lg">
       <div className="flex-1">
         <Link href="/" className="btn btn-ghost normal-case text-lg md:text-xl">
-          Medical Firm
+
+          <Image src="/lemon.png" alt={""} width={150} height={150}/>
+
         </Link>
       </div>
       <div className="flex-none">
         <ul className="menu menu-horizontal px-1">
-          {/* <li>
-            <Link href="/register" className={isActive("/register") ? "active" : ""}>
-              Register
-            </Link>
-          </li> */}
-          {/* <li>
-            <Link href="/login" className={isActive("/login") ? "active" : ""}>
-              Login
-            </Link>
-          </li> */}
-          {/* <li>
-            <Link href="/admin" className={isActive("/admin") ? "active" : ""}>
-              Admin
-            </Link>
-          </li> */}
-          {/* <li>
-            <Link href="/user" className={isActive("/user") ? "active" : ""}>
-              User
-            </Link>
-          </li> */}
+         
           <li>
             {user && <p onClick={handlesignout}>sign out</p>}
             {!user && <p>sign in</p>}
@@ -69,4 +54,3 @@ const Navigation = () => {
 }
 
 export default Navigation
-

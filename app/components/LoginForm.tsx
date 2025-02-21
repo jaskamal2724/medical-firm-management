@@ -56,10 +56,12 @@ const LoginForm = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card bg-base-200 shadow-xl p-6 w-full max-w-sm mx-auto">
+
+    <form onSubmit={handleSubmit} className="card bg-blue-200 shadow-xl p-6 w-full max-w-sm mx-auto">
       <div className="form-control">
         <label htmlFor="email" className="label">
-          <span className="label-text">email:</span>
+          <span className="label-text">Unique ID :</span>
+
         </label>
         <input
           type="text"
@@ -91,5 +93,4 @@ const LoginForm = () => {
 }
 
 export default LoginForm
-
 

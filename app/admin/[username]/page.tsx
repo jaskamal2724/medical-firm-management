@@ -5,10 +5,12 @@ import { useParams } from "next/navigation"
 import ExcelJS from "exceljs"
 import MeetingsTable from "@/app/components/Meetings"
 import { Pencil,  Trash2, Download} from "lucide-react"
-import { collection, addDoc, getDocs } from "firebase/firestore"
+import { collection, addDoc, getDocs, query, where, doc, deleteDoc } from "firebase/firestore"
 import { db } from "@/app/firebase"
 import bcrypt from "bcryptjs"
 import {nanoid} from "nanoid"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 interface User {
   id: string
@@ -64,7 +66,7 @@ export default function AdminDashboard() {
       }
       else{
         const response = data.meetings
-        console.log(...response)
+        // console.log(...response)
         setFetchedMeetings((prev)=>[...prev, ...response])
       }
       
@@ -105,8 +107,31 @@ export default function AdminDashboard() {
     }
   }
 
-  const deleteUser = (id: string) => {
-    setUsers(users.filter((user) => user.id !== id))
+  const deleteUser = async (email: string) => {
+    try {
+      // Query Firestore to find the document with the matching email
+      const usersCollection = collection(db, "users");
+      const q = query(usersCollection, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        console.log(`No user found with email: ${email}`);
+        return;
+      }
+
+      // Assuming email is unique, there should only be one match
+      querySnapshot.forEach(async (docSnap) => {
+        const userRef = doc(db, "users", docSnap.id);
+        await deleteDoc(userRef);
+        console.log(`User with email ${email} and ID ${docSnap.id} deleted from Firestore`);
+      });
+
+      // Update local state
+      setUsers(users.filter((user) => user.email !== email));
+    } 
+    catch (error) {
+      console.error("Error deleting user from Firestore: ", error);
+    }
   }
 
   const downloadUserMeetings = async (userId: string) => {
@@ -138,6 +163,15 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-center">Welcome, Admin {username}!</h1>
+
+      <div className="flex items-center justify-center gap-6">
+        <Link href="/doctors">
+        <Button className="text-blue-600 bg-white hover:text-white hover:bg-slate-500" >Doctors</Button>
+        </Link>
+        <Link href="/chemists">
+        <Button className="text-blue-600 bg-white hover:text-white hover:bg-slate-500" >Chemists</Button>
+        </Link>
+      </div>
 
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
@@ -205,7 +239,7 @@ export default function AdminDashboard() {
                   <button onClick={() => setEditingUser(user)} className="btn btn-warning btn-sm mr-2">
                     <Pencil></Pencil>
                   </button>
-                  <button onClick={() => deleteUser(user.id)} className="btn btn-error btn-sm mr-2">
+                  <button onClick={() => deleteUser(user.email)} className="btn btn-error btn-sm mr-2">
                     <Trash2></Trash2>
                   </button>
                   <button onClick={() => downloadUserMeetings("user.id")} className="btn btn-info btn-sm">
