@@ -53,10 +53,7 @@ export default function UserDashboard() {
     name: `${username}`,
   });
 
-  // Visibility of add form
-  const [showform, setShowform] = useState(false);
-  const handleshow = () => setShowform(!showform);
-  const handleremove = () => setShowform(!showform);
+  
 
   // Fetch meetings, doctors, and medicines data
   useEffect(() => {
@@ -86,7 +83,7 @@ export default function UserDashboard() {
       }
     };
     fetchData();
-  }, [username]);
+  }, []);
 
   const addMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
