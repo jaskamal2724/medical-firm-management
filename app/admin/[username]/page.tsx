@@ -40,6 +40,9 @@ interface Meeting {
 }
 
 export default function AdminDashboard() {
+
+  const [USER, setShowUSER]=useState(false)
+
   const { username } = useParams();
   const [users, setUsers] = useState<User[]>([]);
 
@@ -168,10 +171,6 @@ export default function AdminDashboard() {
     link.click();
   };
 
-  
-  useEffect(()=>{
-    
-  })
 
   return (
     <div className="space-y-6">
@@ -202,7 +201,9 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      {/* <div className="card bg-base-200 shadow-xl">
+      
+
+      <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">User Management</h2>
           <form
@@ -292,7 +293,9 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
-      )} */}
+      )}
+
+      
 
       <MeetingsTable meetings={fetchedMeetings} />
     </div>

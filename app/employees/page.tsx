@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { collection, getDocs, addDoc, query, where, doc, deleteDoc } from "firebase/firestore";
 import { Pencil, Trash2, Download } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useParams } from "next/navigation";
+
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import ExcelJS from "exceljs";
@@ -29,7 +29,7 @@ interface User {
   }
 
 const page = () => {
-  const { username } = useParams();
+  
     const [users, setUsers] = useState<User[]>([]);
   
     const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
@@ -68,7 +68,7 @@ const page = () => {
       // Simulating fetching meetings data
       allusers();
       setMeetings(fetchedMeetings);
-    }, []);
+    }, [fetchedMeetings]);
   
     const addUser = async (e: React.FormEvent) => {
       e.preventDefault();

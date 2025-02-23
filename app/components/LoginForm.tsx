@@ -6,8 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { db } from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import {ToastContainer, toast} from "react-toastify"
 
 export interface Dataitem {
   key: string;
@@ -15,65 +14,99 @@ export interface Dataitem {
 }
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
+  const [loading, setLoading]=useState(false)
+
+  const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [data, Setdata] = useState<Dataitem[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // Prevent multiple submissions
+    if(loading) return
+    setLoading(true)
 
-    setIsLoading(true); // Show loading state
+    const userRef = collection(db, "users");
+    const q = query(userRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
 
-    try {
-      // Fetch user data from Firestore
-      const userRef = collection(db, "users");
-      const q = query(userRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
+    if(!querySnapshot.empty){
+    querySnapshot.forEach((doc) => {
+      const userdata = doc.data();
+      setName(userdata.name);
+      setRole(userdata.role);
+      Setdata(userdata.data);
+    });
 
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        const userdata = doc.data();
-        const userName = userdata.name;
-        const userRole = userdata.role;
-        const userData = userdata.data;
-
-        if (userRole === "user") {
-          toast.success('Sign in Success', {
+    if (role == "user") {
+      
+      toast.success('Login Success', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        
+      });
+      setTimeout(()=>{
+        setLoading(false)
+        router.push(`/user/${name}`);
+      },1000)
+      
+      return data;
+    } 
+    else {
+      try {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+        if (user) {
+          toast.success('Login Success', {
             position: "top-right",
             autoClose: 1000,
             hideProgressBar: false,
             closeOnClick: false,
             pauseOnHover: true,
             draggable: true,
+            progress: undefined,
             theme: "light",
+            
           });
-
-          setTimeout(() => {
-            router.push(`/user/${userName}`);
-            setIsLoading(false); // Reset loading after redirect
-          }, 1000);
-
-          return userData;
-        } else {
-          // Admin login with Firebase Auth
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          if (user) {
+          setTimeout(()=>{
+            setLoading(false)
             router.push(`/admin/${user.displayName}`);
-          }
-          setIsLoading(false);
+          },1000)
+          
         }
-      } else {
-        toast.error("User not found!");
-        setIsLoading(false);
+      } catch (error) {
+        console.log("cant redirect to user or admin", error);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed! Check your credentials.");
-      setIsLoading(false);
     }
+    }
+    else{
+      toast.error('user not found', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        
+      });
+      return
+    }
+
   };
 
   return (
@@ -89,6 +122,7 @@ const LoginForm = () => {
         draggable
         pauseOnHover
         theme="light"
+        
       />
 
       <form
@@ -103,10 +137,9 @@ const LoginForm = () => {
             type="text"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setemail(e.target.value)}
             className="input input-bordered w-full"
             required
-            disabled={isLoading} // Disable input while loading
           />
         </div>
         <div className="form-control mt-4">
@@ -120,15 +153,10 @@ const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="input input-bordered w-full"
             required
-            disabled={isLoading} // Disable input while loading
           />
         </div>
-        <button
-          type="submit"
-          className={`btn btn-primary mt-6 w-full `}
-          disabled={isLoading} // Disable button while loading
-        >
-          {isLoading ? (<span className="loading loading-dots loading-lg"></span>) : ("Login")}
+        <button type="submit" className="btn btn-primary mt-6 w-full">
+          {loading ? <span className="loading loading-dots loading-lg"></span> : "Login" }
         </button>
       </form>
     </>
