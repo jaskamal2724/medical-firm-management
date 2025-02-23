@@ -41,7 +41,7 @@ interface Meeting {
 
 export default function AdminDashboard() {
 
-  const [USER, setShowUSER]=useState(false)
+  
 
   const { username } = useParams();
   const [users, setUsers] = useState<User[]>([]);

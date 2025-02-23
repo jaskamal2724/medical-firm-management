@@ -54,8 +54,6 @@ export default function UserDashboard() {
     name: `${username}`,
   });
 
-  
-
   // Fetch meetings, doctors, and medicines data
   useEffect(() => {
     const fetchData = async () => {
@@ -84,7 +82,7 @@ export default function UserDashboard() {
       }
     };
     fetchData();
-  }, [meetings]);
+  }, []);
 
   const addMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
