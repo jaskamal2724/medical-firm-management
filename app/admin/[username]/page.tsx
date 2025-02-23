@@ -41,13 +41,11 @@ interface Meeting {
 
 export default function AdminDashboard() {
 
-  
-
   const { username } = useParams();
   const [users, setUsers] = useState<User[]>([]);
 
-  const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  // const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
+  // const [editingUser, setEditingUser] = useState<User | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
 
   const [fetchedMeetings, setFetchedMeetings] = useState<Meeting[]>([]);
@@ -84,95 +82,94 @@ export default function AdminDashboard() {
     setMeetings(fetchedMeetings);
   }, [meetings]);
 
-  const addUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const docRef = await addDoc(collection(db, "users"), {
-        name: newUser.name,
-        email: newUser.email,
-        password: await bcrypt.hash(newUser.password, 10),
-        data: [],
-        role: "user",
-      });
-      console.log("user added", docRef.id);
-      setUsers([
-        ...users,
-        { ...newUser, id: String(users.length + 1), data: [], role: "user" },
-      ]);
-      setNewUser({ name: "", email: "", password: "" });
-    } catch (error) {
-      console.error("error adding user", error);
-    }
-  };
+  // const addUser = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     const docRef = await addDoc(collection(db, "users"), {
+  //       name: newUser.name,
+  //       email: newUser.email,
+  //       password: await bcrypt.hash(newUser.password, 10),
+  //       data: [],
+  //       role: "user",
+  //     });
+  //     console.log("user added", docRef.id);
+  //     setUsers([
+  //       ...users,
+  //       { ...newUser, id: String(users.length + 1), data: [], role: "user" },
+  //     ]);
+  //     setNewUser({ name: "", email: "", password: "" });
+  //   } catch (error) {
+  //     console.error("error adding user", error);
+  //   }
+  // };
 
-  const updateUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingUser) {
-      setUsers(
-        users.map((user) => (user.id === editingUser.id ? editingUser : user))
-      );
-      setEditingUser(null);
-    }
-  };
+  // const updateUser = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (editingUser) {
+  //     setUsers(
+  //       users.map((user) => (user.id === editingUser.id ? editingUser : user))
+  //     );
+  //     setEditingUser(null);
+  //   }
+  // };
 
-  const deleteUser = async (email: string) => {
-    try {
-      // Query Firestore to find the document with the matching email
-      const usersCollection = collection(db, "users");
-      const q = query(usersCollection, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
+  // const deleteUser = async (email: string) => {
+  //   try {
+  //     // Query Firestore to find the document with the matching email
+  //     const usersCollection = collection(db, "users");
+  //     const q = query(usersCollection, where("email", "==", email));
+  //     const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty) {
-        console.log(`No user found with email: ${email}`);
-        return;
-      }
+  //     if (querySnapshot.empty) {
+  //       console.log(`No user found with email: ${email}`);
+  //       return;
+  //     }
 
-      // Assuming email is unique, there should only be one match
-      querySnapshot.forEach(async (docSnap) => {
-        const userRef = doc(db, "users", docSnap.id);
-        await deleteDoc(userRef);
-        console.log(
-          `User with email ${email} and ID ${docSnap.id} deleted from Firestore`
-        );
-      });
+  //     // Assuming email is unique, there should only be one match
+  //     querySnapshot.forEach(async (docSnap) => {
+  //       const userRef = doc(db, "users", docSnap.id);
+  //       await deleteDoc(userRef);
+  //       console.log(
+  //         `User with email ${email} and ID ${docSnap.id} deleted from Firestore`
+  //       );
+  //     });
 
-      // Update local state
-      setUsers(users.filter((user) => user.email !== email));
-    } catch (error) {
-      console.error("Error deleting user from Firestore: ", error);
-    }
-  };
+  //     // Update local state
+  //     setUsers(users.filter((user) => user.email !== email));
+  //   } catch (error) {
+  //     console.error("Error deleting user from Firestore: ", error);
+  //   }
+  // };
 
-  const downloadUserMeetings = async (userId: string) => {
-    const userMeetings = meetings.filter((meeting) => meeting.id === userId);
+  // const downloadUserMeetings = async (userId: string) => {
+  //   const userMeetings = meetings.filter((meeting) => meeting.id === userId);
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Meetings");
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Meetings");
 
-    worksheet.columns = [
-      { header: "ID", key: "id", width: 10 },
-      { header: "Person Met", key: "personMet", width: 20 },
-      { header: "Medicine Discussed", key: "medicineDiscussed", width: 20 },
-      { header: "Notes", key: "notes", width: 30 },
-      { header: "Date", key: "date", width: 15 },
-    ];
+  //   worksheet.columns = [
+  //     { header: "ID", key: "id", width: 10 },
+  //     { header: "Person Met", key: "personMet", width: 20 },
+  //     { header: "Medicine Discussed", key: "medicineDiscussed", width: 20 },
+  //     { header: "Notes", key: "notes", width: 30 },
+  //     { header: "Date", key: "date", width: 15 },
+  //   ];
 
-    userMeetings.forEach((meeting) => {
-      worksheet.addRow(meeting);
-    });
+  //   userMeetings.forEach((meeting) => {
+  //     worksheet.addRow(meeting);
+  //   });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = `user_${userId}_meetings.xlsx`;
-    link.click();
-  };
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //   });
+  //   const link = document.createElement("a");
+  //   link.href = window.URL.createObjectURL(blob);
+  //   link.download = `user_${userId}_meetings.xlsx`;
+  //   link.click();
+  // };
 
   
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-center">
@@ -202,9 +199,8 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      
 
-      <div className="card bg-base-200 shadow-xl">
+      {/* <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">User Management</h2>
           <form
@@ -294,9 +290,7 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
-      )}
-
-      
+      )} */}
 
       <MeetingsTable meetings={fetchedMeetings} />
     </div>
