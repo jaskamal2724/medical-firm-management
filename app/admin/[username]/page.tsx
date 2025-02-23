@@ -1,20 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import ExcelJS from "exceljs";
+
 import MeetingsTable from "@/app/components/Meetings";
-import { Pencil, Trash2, Download } from "lucide-react";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
+
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebase";
-import bcrypt from "bcryptjs";
+
 import { nanoid } from "nanoid";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -40,7 +32,6 @@ interface Meeting {
 }
 
 export default function AdminDashboard() {
-
   const { username } = useParams();
   const [users, setUsers] = useState<User[]>([]);
 
@@ -68,6 +59,7 @@ export default function AdminDashboard() {
         });
 
         setUsers(usersData);
+        
       } else {
         const response = data.meetings;
         // console.log(...response)
@@ -79,6 +71,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     // Simulating fetching meetings data
     allusers();
+    console.log(users.filter((user)=>user.name))
     setMeetings(fetchedMeetings);
   }, [meetings]);
 
@@ -169,7 +162,6 @@ export default function AdminDashboard() {
   //   link.click();
   // };
 
-  
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-center">
@@ -198,7 +190,6 @@ export default function AdminDashboard() {
           </Button>
         </Link>
       </div>
-
 
       {/* <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
