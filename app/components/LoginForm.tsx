@@ -31,12 +31,12 @@ const LoginForm = () => {
       if (!querySnapshot.empty) {
         // User exists in Firestore
         let fetchedName = "";
-        let fetchedData: Dataitem[] = [];
+        // let fetchedData: Dataitem[] = [];
 
         querySnapshot.forEach((doc) => {
           const userdata = doc.data();
           fetchedName = userdata.name;
-          fetchedData = userdata.data;
+          // fetchedData = userdata.data;
         });
 
         toast.success("User Login Success", { autoClose: 1000 });

@@ -41,7 +41,7 @@ interface Meeting {
 
 export default function AdminDashboard() {
 
-  const [USER, setShowUSER]=useState(false)
+  
 
   const { username } = useParams();
   const [users, setUsers] = useState<User[]>([]);
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
     // Simulating fetching meetings data
     allusers();
     setMeetings(fetchedMeetings);
-  }, []);
+  }, [meetings]);
 
   const addUser = async (e: React.FormEvent) => {
     e.preventDefault();
