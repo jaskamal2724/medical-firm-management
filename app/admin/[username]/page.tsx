@@ -82,7 +82,7 @@ export default function AdminDashboard() {
     // Simulating fetching meetings data
     allusers();
     setMeetings(fetchedMeetings);
-  }, []);
+  }, [fetchedMeetings]);
 
   const addUser = async (e: React.FormEvent) => {
     e.preventDefault();

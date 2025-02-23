@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { collection, getDocs, addDoc, query, where, doc, deleteDoc } from "firebase/firestore";
 import { Pencil, Trash2, Download } from "lucide-react";
 import { nanoid } from "nanoid";
-
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import ExcelJS from "exceljs";
@@ -28,7 +27,7 @@ interface User {
     name: string;
   }
 
-const page = () => {
+const Page = () => {
   
     const [users, setUsers] = useState<User[]>([]);
   
@@ -254,4 +253,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
