@@ -40,6 +40,7 @@ interface Medicine {
 
 export default function UserDashboard() {
   const { username } = useParams();
+  const name = (username?.toString())?.replace(/[^a-zA-Z\s]/g, " ")
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]); // State for medicines list
@@ -133,7 +134,7 @@ export default function UserDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        Welcome, {username}
+        Welcome, {name}
       </motion.h1>
 
       <div className="card bg-base-200 shadow-xl">

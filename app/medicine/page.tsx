@@ -102,11 +102,9 @@ export default function MedicinesPage() {
         transition={{ duration: 0.5 }}
       >
         <div className="card-body">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-center items-center">
             <h2 className="card-title">Add Medicine Details</h2>
-            <Link href="/dashboard">
-              <Button>Back</Button>
-            </Link>
+            
           </div>
 
           <form onSubmit={addMedicine} className="space-y-4">

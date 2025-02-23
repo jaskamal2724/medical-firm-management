@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase"; // Ensure this points to your Firebase config
-
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { nanoid } from "nanoid";
 
 interface Chemist {
   id: string; // Unique identifier for each chemist
   name: string;
-  shopName: string;
+  owner: string;
   contact: string;
   location: string;
 }
@@ -20,7 +21,7 @@ export default function ChemistsPage() {
   const [newChemist, setNewChemist] = useState({
     id: "",
     name: "",
-    shopName: "",
+    owner: "",
     contact: "",
     location: "",
   });
@@ -28,7 +29,7 @@ export default function ChemistsPage() {
   // Fetch chemists from Firestore on mount
   useEffect(() => {
     const fetchChemists = async () => {
-      const chemistsRef = doc(db, "chemists", "list"); // Single document to store all chemists
+      const chemistsRef = doc(db, "chemists", "list");
       const chemistsSnap = await getDoc(chemistsRef);
 
       if (chemistsSnap.exists()) {
@@ -46,10 +47,9 @@ export default function ChemistsPage() {
 
     const chemistWithId = {
       ...newChemist,
-      id: nanoid(), // Generate a unique ID for each chemist
+      id: nanoid(),
     };
 
-    // Optimistically update the UI
     setChemists((prev) => [...prev, chemistWithId]);
 
     try {
@@ -67,25 +67,23 @@ export default function ChemistsPage() {
       }
     } catch (error) {
       console.error("Error adding chemist: ", error);
-      // Roll back UI update on error
       setChemists((prev) => prev.filter((c) => c.id !== chemistWithId.id));
     }
 
-    // Reset form
     setNewChemist({
       id: "",
       name: "",
-      shopName: "",
+      owner: "",
       contact: "",
       location: "",
     });
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 space-y-6"> {/* Reduced from max-w-4xl to max-w-xl */}
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Page Title */}
       <motion.h1
-        className="text-3xl font-bold text-center"
+        className="text-2xl sm:text-3xl font-bold text-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -93,24 +91,24 @@ export default function ChemistsPage() {
         Chemists Management
       </motion.h1>
 
-      <div className="flex flex-col items-center justify-center gap-7">
       {/* Add Chemist Form */}
       <motion.div
-        className="card bg-base-200 shadow-xl w-[500px]"
+        className="card bg-base-200 shadow-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="card-body">
-          <div className="flex justify-center items-center">
-            <h2 className="card-title">Add Chemist Details</h2> {/* Slightly larger title */}
+        <div className="card-body p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-0 mb-2">
+            <h2 className="card-title text-lg sm:text-xl">Add Chemist Details</h2>
+            
           </div>
 
-          <form onSubmit={addChemist} className="space-y-4"> {/* Increased spacing to match original */}
+          <form onSubmit={addChemist} className="space-y-4">
             {/* Name Field */}
             <div className="form-control">
               <label htmlFor="name" className="label">
-                <span className="label-text">Chemist Name</span>
+                <span className="label-text text-sm sm:text-base">Chemist Name</span>
               </label>
               <input
                 type="text"
@@ -119,24 +117,24 @@ export default function ChemistsPage() {
                 onChange={(e) =>
                   setNewChemist({ ...newChemist, name: e.target.value })
                 }
-                className="input input-bordered w-full" // Default size (larger than input-sm)
+                className="input input-bordered w-full text-sm sm:text-base"
                 required
               />
             </div>
 
             {/* Shop Name Field */}
             <div className="form-control">
-              <label htmlFor="shopName" className="label">
-                <span className="label-text">Shop Name</span>
+              <label htmlFor="owner" className="label">
+                <span className="label-text text-sm sm:text-base">Owner</span>
               </label>
               <input
                 type="text"
-                id="shopName"
-                value={newChemist.shopName}
+                id="owner"
+                value={newChemist.owner}
                 onChange={(e) =>
-                  setNewChemist({ ...newChemist, shopName: e.target.value })
+                  setNewChemist({ ...newChemist, owner: e.target.value })
                 }
-                className="input input-bordered w-full" // Default size
+                className="input input-bordered w-full text-sm sm:text-base"
                 required
               />
             </div>
@@ -144,7 +142,7 @@ export default function ChemistsPage() {
             {/* Contact Field */}
             <div className="form-control">
               <label htmlFor="contact" className="label">
-                <span className="label-text">Contact</span>
+                <span className="label-text text-sm sm:text-base">Contact</span>
               </label>
               <input
                 type="text"
@@ -153,7 +151,7 @@ export default function ChemistsPage() {
                 onChange={(e) =>
                   setNewChemist({ ...newChemist, contact: e.target.value })
                 }
-                className="input input-bordered w-full" // Default size
+                className="input input-bordered w-full text-sm sm:text-base"
                 placeholder="+1234567890"
                 required
               />
@@ -162,7 +160,7 @@ export default function ChemistsPage() {
             {/* Location Field */}
             <div className="form-control">
               <label htmlFor="location" className="label">
-                <span className="label-text">Location</span>
+                <span className="label-text text-sm sm:text-base">Location</span>
               </label>
               <input
                 type="text"
@@ -171,13 +169,13 @@ export default function ChemistsPage() {
                 onChange={(e) =>
                   setNewChemist({ ...newChemist, location: e.target.value })
                 }
-                className="input input-bordered w-full" // Default size
+                className="input input-bordered w-full text-sm sm:text-base"
                 placeholder="Gurgaon"
                 required
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full">
+            <button type="submit" className="btn btn-primary w-full sm:text-base text-sm">
               Add Chemist
             </button>
           </form>
@@ -187,21 +185,21 @@ export default function ChemistsPage() {
       {/* Chemists List */}
       {chemists.length > 0 && (
         <motion.div
-          className="card bg-base-200 shadow-xl w-[700px]"
+          className="card bg-base-200 shadow-xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="card-body">
-            <h2 className="card-title text-center">Chemists List</h2>
+          <div className="card-body p-4 sm:p-6">
+            <h2 className="card-title text-lg sm:text-xl">Chemists List</h2>
             <div className="overflow-x-auto">
-              <table className="table w-full">
+              <table className="table w-full table-compact sm:table-normal">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Shop Name</th>
-                    <th>Contact</th>
-                    <th>Location</th>
+                    <th className="text-sm sm:text-base">Name</th>
+                    <th className="text-sm sm:text-base">Owner</th>
+                    <th className="text-sm sm:text-base">Contact</th>
+                    <th className="text-sm sm:text-base">Location</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -213,10 +211,10 @@ export default function ChemistsPage() {
                       transition={{ duration: 0.3 }}
                       whileHover={{ scale: 1.02 }}
                     >
-                      <td>{chemist.name}</td>
-                      <td>{chemist.shopName}</td>
-                      <td>{chemist.contact}</td>
-                      <td>{chemist.location}</td>
+                      <td className="text-sm sm:text-base">{chemist.name}</td>
+                      <td className="text-sm sm:text-base">{chemist.owner}</td>
+                      <td className="text-sm sm:text-base">{chemist.contact}</td>
+                      <td className="text-sm sm:text-base">{chemist.location}</td>
                     </motion.tr>
                   ))}
                 </tbody>
@@ -225,8 +223,6 @@ export default function ChemistsPage() {
           </div>
         </motion.div>
       )}
-      </div>
-
     </div>
   );
 }
