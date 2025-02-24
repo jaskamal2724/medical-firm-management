@@ -1,6 +1,6 @@
 "use client";
 
-import {  useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
@@ -8,8 +8,8 @@ import { db, auth } from "@/app/firebase";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
-
-import {toast, ToastContainer} from "react-toastify"
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Meeting {
   medicine: string;
@@ -45,7 +45,6 @@ export default function UserDashboard() {
   const name = String(username).replace("%20", " ");
   const router = useRouter();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
-
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [newMeeting, setNewMeeting] = useState({
@@ -71,8 +70,28 @@ export default function UserDashboard() {
     location: "",
     anniversary: "",
   });
-  const [showForm, setShowForm] = useState<"meeting" | "medicine" | "doctor">(
-    "meeting"
+  const [showForm, setShowForm] = useState<"meeting" | "medicine" | "doctor">("meeting");
+
+  // Fetch doctors from Firestore on mount
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const doctorsRef = doc(db, "doctors", "list");
+      const doctorsSnap = await getDoc(doctorsRef);
+
+      if (doctorsSnap.exists()) {
+        const data = doctorsSnap.data().doctors || [];
+        setDoctors(data);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  // Filter doctors based on the location entered in the meeting form
+  const filteredDoctors = doctors.filter((doctor) =>
+    newMeeting.location
+      ? doctor.location.toLowerCase().includes(newMeeting.location.toLowerCase())
+      : true
   );
 
   // Toggle between meeting, medicine, and doctor forms
@@ -100,13 +119,40 @@ export default function UserDashboard() {
         const existingData = userSnap.data().meetings || [];
         const updatedMeetings = [...existingData, newMeeting];
         await updateDoc(userRef, { meetings: updatedMeetings });
+        toast.success('Meeting added', {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
         console.log("Meeting added to existing document");
       } else {
         await setDoc(userRef, { meetings: [newMeeting] });
+        toast.success('Meeting added', {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
         console.log("New document created with meeting");
       }
     } catch (error) {
       console.log("Error adding document ", error);
+      toast.error('Failed to add meeting', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
 
     setNewMeeting({
@@ -134,36 +180,41 @@ export default function UserDashboard() {
         const existingData = medicinesSnap.data().medicines || [];
         const updatedMedicines = [...existingData, medicineWithId];
         await updateDoc(medicinesRef, { medicines: updatedMedicines });
-        toast.success('medicine added', {
+        toast.success('Medicine added', {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: false,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
-          
-          });
+        });
         console.log("Medicine added to existing document");
       } else {
         await setDoc(medicinesRef, { medicines: [medicineWithId] });
-        toast.success('medicine added', {
+        toast.success('Medicine added', {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: false,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
-          
-          });
+        });
         console.log("New document created with medicine");
       }
     } catch (error) {
       console.error("Error adding medicine: ", error);
       setMedicines((prev) => prev.filter((m) => m.id !== medicineWithId.id));
+      toast.error('Failed to add medicine', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
 
     setNewMedicine({ name: "", description: "", manufacturer: "", stock: 0 });
@@ -183,36 +234,41 @@ export default function UserDashboard() {
         const existingData = doctorsSnap.data().doctors || [];
         const updatedDoctors = [...existingData, doctorWithId];
         await updateDoc(doctorsRef, { doctors: updatedDoctors });
-        toast.success('doctor added', {
+        toast.success('Doctor added', {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: false,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
-          
-          });
+        });
         console.log("Doctor added to existing document");
       } else {
         await setDoc(doctorsRef, { doctors: [doctorWithId] });
-        toast.success('doctor added', {
+        toast.success('Doctor added', {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: false,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "light",
-          
-          });
+        });
         console.log("New document created with doctor");
       }
     } catch (error) {
       console.error("Error adding doctor: ", error);
       setDoctors((prev) => prev.filter((d) => d.id !== doctorWithId.id));
+      toast.error('Failed to add doctor', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
 
     setNewDoctor({
@@ -244,7 +300,6 @@ export default function UserDashboard() {
         draggable
         pauseOnHover
         theme="light"
-        
       />
 
       <div className="space-y-6 max-w-xl mx-auto px-4 py-6">
@@ -271,10 +326,7 @@ export default function UserDashboard() {
                 <Button onClick={() => toggleForm("meeting")} variant="outline">
                   Add Meeting
                 </Button>
-                <Button
-                  onClick={() => toggleForm("medicine")}
-                  variant="outline"
-                >
+                <Button onClick={() => toggleForm("medicine")} variant="outline">
                   Add Medicine
                 </Button>
                 <Button onClick={() => toggleForm("doctor")} variant="outline">
@@ -286,6 +338,21 @@ export default function UserDashboard() {
 
             {showForm === "meeting" ? (
               <form onSubmit={addMeeting} className="space-y-4">
+                <div className="form-control">
+                  <label htmlFor="location" className="label">
+                    <span className="label-text">Location</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="location"
+                    value={newMeeting.location}
+                    onChange={(e) =>
+                      setNewMeeting({ ...newMeeting, location: e.target.value })
+                    }
+                    className="input input-bordered w-full"
+                    placeholder="Gurgaon"
+                  />
+                </div>
                 <div className="form-control">
                   <label htmlFor="doctor" className="label">
                     <span className="label-text">Doctor</span>
@@ -302,7 +369,7 @@ export default function UserDashboard() {
                     <option value="" disabled>
                       Select a Doctor
                     </option>
-                    {doctors.map((doctor) => (
+                    {filteredDoctors.map((doctor) => (
                       <option key={doctor.id} value={doctor.name}>
                         {doctor.name} ({doctor.specialty})
                       </option>
@@ -361,21 +428,6 @@ export default function UserDashboard() {
                     rows={3}
                   ></textarea>
                 </div>
-                <div className="form-control">
-                  <label htmlFor="location" className="label">
-                    <span className="label-text">Location</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
-                    value={newMeeting.location}
-                    onChange={(e) =>
-                      setNewMeeting({ ...newMeeting, location: e.target.value })
-                    }
-                    className="input input-bordered w-full"
-                    placeholder="Gurgaon"
-                  />
-                </div>
                 <button type="submit" className="btn btn-primary w-full">
                   Add Meeting
                 </button>
@@ -405,10 +457,7 @@ export default function UserDashboard() {
                     id="description"
                     value={newMedicine.description}
                     onChange={(e) =>
-                      setNewMedicine({
-                        ...newMedicine,
-                        description: e.target.value,
-                      })
+                      setNewMedicine({ ...newMedicine, description: e.target.value })
                     }
                     className="textarea textarea-bordered h-24"
                     rows={3}
@@ -424,10 +473,7 @@ export default function UserDashboard() {
                     id="manufacturer"
                     value={newMedicine.manufacturer}
                     onChange={(e) =>
-                      setNewMedicine({
-                        ...newMedicine,
-                        manufacturer: e.target.value,
-                      })
+                      setNewMedicine({ ...newMedicine, manufacturer: e.target.value })
                     }
                     className="input input-bordered w-full"
                     required
@@ -442,10 +488,7 @@ export default function UserDashboard() {
                     id="stock"
                     value={newMedicine.stock}
                     onChange={(e) =>
-                      setNewMedicine({
-                        ...newMedicine,
-                        stock: parseInt(e.target.value) || 0,
-                      })
+                      setNewMedicine({ ...newMedicine, stock: parseInt(e.target.value) || 0 })
                     }
                     className="input input-bordered w-full"
                     min="0"
@@ -531,10 +574,7 @@ export default function UserDashboard() {
                     id="anniversary"
                     value={newDoctor.anniversary}
                     onChange={(e) =>
-                      setNewDoctor({
-                        ...newDoctor,
-                        anniversary: e.target.value,
-                      })
+                      setNewDoctor({ ...newDoctor, anniversary: e.target.value })
                     }
                     className="input input-bordered w-full"
                     placeholder="24 March 1997"
