@@ -67,7 +67,7 @@ const Page = () => {
       // Simulating fetching meetings data
       allusers();
       setMeetings(fetchedMeetings);
-    });
+    },[meetings]);
   
     const addUser = async (e: React.FormEvent) => {
       e.preventDefault();

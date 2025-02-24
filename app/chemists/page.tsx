@@ -88,10 +88,12 @@ export default function ChemistsPage() {
       >
         Chemists Management
       </motion.h1>
+       
+      <div className="flex flex-col items-center gap-8">
 
       {/* Add Chemist Form */}
       <motion.div
-        className="card bg-base-200 shadow-xl"
+        className="card bg-base-200 shadow-xl w-3/5"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -221,6 +223,8 @@ export default function ChemistsPage() {
           </div>
         </motion.div>
       )}
+      </div>
+
     </div>
   );
 }
