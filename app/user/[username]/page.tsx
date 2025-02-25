@@ -12,7 +12,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Meeting {
-  medicine: string;
+  medicine: string; // Changed back to medicine
   id: number;
   doctor: string;
   hospital: string;
@@ -32,6 +32,14 @@ interface Doctor {
   anniversary: string;
 }
 
+interface Chemist {
+  id: string;
+  name: string;
+  owner: string;
+  contact: string;
+  location: string;
+}
+
 interface Medicine {
   id: string;
   name: string;
@@ -46,21 +54,22 @@ export default function UserDashboard() {
   const router = useRouter();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [chemists, setChemists] = useState<Chemist[]>([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]); // Added medicines state
   const [newMeeting, setNewMeeting] = useState({
+    medicine: "", // Changed back to medicine
     doctor: "",
     hospital: "",
-    medicine: "",
     feedback: "",
     location: "",
     date: Date.now(),
     name: `${username}`,
   });
-  const [newMedicine, setNewMedicine] = useState({
+  const [newChemist, setNewChemist] = useState({
     name: "",
-    description: "",
-    manufacturer: "",
-    stock: 0,
+    owner: "",
+    contact: "",
+    location: "",
   });
   const [newDoctor, setNewDoctor] = useState({
     name: "",
@@ -70,9 +79,9 @@ export default function UserDashboard() {
     location: "",
     anniversary: "",
   });
-  const [showForm, setShowForm] = useState<"meeting" | "medicine" | "doctor">("meeting");
+  const [showForm, setShowForm] = useState<"meeting" | "chemist" | "doctor">("meeting");
 
-  // Fetch doctors from Firestore on mount
+  // Fetch doctors and medicines from Firestore on mount
   useEffect(() => {
     const fetchDoctors = async () => {
       const doctorsRef = doc(db, "doctors", "list");
@@ -84,7 +93,18 @@ export default function UserDashboard() {
       }
     };
 
+    const fetchMedicines = async () => {
+      const medicinesRef = doc(db, "medicines", "list"); // Assuming medicines are stored in medicines/list
+      const medicinesSnap = await getDoc(medicinesRef);
+
+      if (medicinesSnap.exists()) {
+        const data = medicinesSnap.data().medicines || [];
+        setMedicines(data);
+      }
+    };
+
     fetchDoctors();
+    fetchMedicines();
   }, []);
 
   // Filter doctors based on the location entered in the meeting form
@@ -94,8 +114,8 @@ export default function UserDashboard() {
       : true
   );
 
-  // Toggle between meeting, medicine, and doctor forms
-  const toggleForm = (formType: "meeting" | "medicine" | "doctor") => {
+  // Toggle between meeting, chemist, and doctor forms
+  const toggleForm = (formType: "meeting" | "chemist" | "doctor") => {
     setShowForm(formType);
   };
 
@@ -119,7 +139,7 @@ export default function UserDashboard() {
         const existingData = userSnap.data().meetings || [];
         const updatedMeetings = [...existingData, newMeeting];
         await updateDoc(userRef, { meetings: updatedMeetings });
-        toast.success('Meeting added', {
+        toast.success("Meeting added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -131,7 +151,7 @@ export default function UserDashboard() {
         console.log("Meeting added to existing document");
       } else {
         await setDoc(userRef, { meetings: [newMeeting] });
-        toast.success('Meeting added', {
+        toast.success("Meeting added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -144,7 +164,7 @@ export default function UserDashboard() {
       }
     } catch (error) {
       console.log("Error adding document ", error);
-      toast.error('Failed to add meeting', {
+      toast.error("Failed to add meeting", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -156,9 +176,9 @@ export default function UserDashboard() {
     }
 
     setNewMeeting({
+      medicine: "", // Changed back to medicine
       doctor: "",
       hospital: "",
-      medicine: "",
       feedback: "",
       location: "",
       date: Date.now(),
@@ -166,21 +186,21 @@ export default function UserDashboard() {
     });
   };
 
-  // Add medicine
-  const addMedicine = async (e: React.FormEvent) => {
+  // Add chemist
+  const addChemist = async (e: React.FormEvent) => {
     e.preventDefault();
-    const medicineWithId = { ...newMedicine, id: nanoid() };
-    setMedicines((prev) => [...prev, medicineWithId]);
+    const chemistWithId = { ...newChemist, id: nanoid() };
+    setChemists((prev) => [...prev, chemistWithId]);
 
     try {
-      const medicinesRef = doc(db, "medicines", "list");
-      const medicinesSnap = await getDoc(medicinesRef);
+      const chemistsRef = doc(db, "chemists", "list");
+      const chemistsSnap = await getDoc(chemistsRef);
 
-      if (medicinesSnap.exists()) {
-        const existingData = medicinesSnap.data().medicines || [];
-        const updatedMedicines = [...existingData, medicineWithId];
-        await updateDoc(medicinesRef, { medicines: updatedMedicines });
-        toast.success('Medicine added', {
+      if (chemistsSnap.exists()) {
+        const existingData = chemistsSnap.data().chemists || [];
+        const updatedChemists = [...existingData, chemistWithId];
+        await updateDoc(chemistsRef, { chemists: updatedChemists });
+        toast.success("Chemist added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -189,10 +209,10 @@ export default function UserDashboard() {
           draggable: true,
           theme: "light",
         });
-        console.log("Medicine added to existing document");
+        console.log("Chemist added to existing document");
       } else {
-        await setDoc(medicinesRef, { medicines: [medicineWithId] });
-        toast.success('Medicine added', {
+        await setDoc(chemistsRef, { chemists: [chemistWithId] });
+        toast.success("Chemist added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -201,12 +221,12 @@ export default function UserDashboard() {
           draggable: true,
           theme: "light",
         });
-        console.log("New document created with medicine");
+        console.log("New document created with chemist");
       }
     } catch (error) {
-      console.error("Error adding medicine: ", error);
-      setMedicines((prev) => prev.filter((m) => m.id !== medicineWithId.id));
-      toast.error('Failed to add medicine', {
+      console.error("Error adding chemist: ", error);
+      setChemists((prev) => prev.filter((c) => c.id !== chemistWithId.id));
+      toast.error("Failed to add chemist", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -217,7 +237,7 @@ export default function UserDashboard() {
       });
     }
 
-    setNewMedicine({ name: "", description: "", manufacturer: "", stock: 0 });
+    setNewChemist({ name: "", owner: "", contact: "", location: "" });
   };
 
   // Add doctor
@@ -234,7 +254,7 @@ export default function UserDashboard() {
         const existingData = doctorsSnap.data().doctors || [];
         const updatedDoctors = [...existingData, doctorWithId];
         await updateDoc(doctorsRef, { doctors: updatedDoctors });
-        toast.success('Doctor added', {
+        toast.success("Doctor added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -246,7 +266,7 @@ export default function UserDashboard() {
         console.log("Doctor added to existing document");
       } else {
         await setDoc(doctorsRef, { doctors: [doctorWithId] });
-        toast.success('Doctor added', {
+        toast.success("Doctor added", {
           position: "top-right",
           autoClose: 1000,
           hideProgressBar: false,
@@ -260,7 +280,7 @@ export default function UserDashboard() {
     } catch (error) {
       console.error("Error adding doctor: ", error);
       setDoctors((prev) => prev.filter((d) => d.id !== doctorWithId.id));
-      toast.error('Failed to add doctor', {
+      toast.error("Failed to add doctor", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -318,16 +338,16 @@ export default function UserDashboard() {
               <h2 className="card-title">
                 {showForm === "meeting"
                   ? "Add Meeting Details"
-                  : showForm === "medicine"
-                  ? "Add Medicine Details"
+                  : showForm === "chemist"
+                  ? "Add Chemist Details"
                   : "Add Doctor Details"}
               </h2>
               <div className="flex gap-2">
                 <Button onClick={() => toggleForm("meeting")} variant="outline">
                   Add Meeting
                 </Button>
-                <Button onClick={() => toggleForm("medicine")} variant="outline">
-                  Add Medicine
+                <Button onClick={() => toggleForm("chemist")} variant="outline">
+                  Add Chemist
                 </Button>
                 <Button onClick={() => toggleForm("doctor")} variant="outline">
                   Add Doctor
@@ -432,71 +452,72 @@ export default function UserDashboard() {
                   Add Meeting
                 </button>
               </form>
-            ) : showForm === "medicine" ? (
-              <form onSubmit={addMedicine} className="space-y-4">
+            ) : showForm === "chemist" ? (
+              <form onSubmit={addChemist} className="space-y-4">
                 <div className="form-control">
                   <label htmlFor="name" className="label">
-                    <span className="label-text">Medicine Name</span>
+                    <span className="label-text">Chemist Name</span>
                   </label>
                   <input
                     type="text"
                     id="name"
-                    value={newMedicine.name}
+                    value={newChemist.name}
                     onChange={(e) =>
-                      setNewMedicine({ ...newMedicine, name: e.target.value })
+                      setNewChemist({ ...newChemist, name: e.target.value })
                     }
                     className="input input-bordered w-full"
                     required
                   />
                 </div>
                 <div className="form-control">
-                  <label htmlFor="description" className="label">
-                    <span className="label-text">Description</span>
-                  </label>
-                  <textarea
-                    id="description"
-                    value={newMedicine.description}
-                    onChange={(e) =>
-                      setNewMedicine({ ...newMedicine, description: e.target.value })
-                    }
-                    className="textarea textarea-bordered h-24"
-                    rows={3}
-                    placeholder="e.g., Uses, dosage, side effects"
-                  />
-                </div>
-                <div className="form-control">
-                  <label htmlFor="manufacturer" className="label">
-                    <span className="label-text">Manufacturer</span>
+                  <label htmlFor="owner" className="label">
+                    <span className="label-text">Owner</span>
                   </label>
                   <input
                     type="text"
-                    id="manufacturer"
-                    value={newMedicine.manufacturer}
+                    id="owner"
+                    value={newChemist.owner}
                     onChange={(e) =>
-                      setNewMedicine({ ...newMedicine, manufacturer: e.target.value })
+                      setNewChemist({ ...newChemist, owner: e.target.value })
                     }
                     className="input input-bordered w-full"
                     required
                   />
                 </div>
                 <div className="form-control">
-                  <label htmlFor="stock" className="label">
-                    <span className="label-text">Stock Available</span>
+                  <label htmlFor="contact" className="label">
+                    <span className="label-text">Contact</span>
                   </label>
                   <input
-                    type="number"
-                    id="stock"
-                    value={newMedicine.stock}
+                    type="text"
+                    id="contact"
+                    value={newChemist.contact}
                     onChange={(e) =>
-                      setNewMedicine({ ...newMedicine, stock: parseInt(e.target.value) || 0 })
+                      setNewChemist({ ...newChemist, contact: e.target.value })
                     }
                     className="input input-bordered w-full"
-                    min="0"
+                    placeholder="+1234567890"
+                    required
+                  />
+                </div>
+                <div className="form-control">
+                  <label htmlFor="chemistLocation" className="label">
+                    <span className="label-text">Location</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="chemistLocation"
+                    value={newChemist.location}
+                    onChange={(e) =>
+                      setNewChemist({ ...newChemist, location: e.target.value })
+                    }
+                    className="input input-bordered w-full"
+                    placeholder="Gurgaon"
                     required
                   />
                 </div>
                 <button type="submit" className="btn btn-primary w-full">
-                  Add Medicine
+                  Add Chemist
                 </button>
               </form>
             ) : (
@@ -620,7 +641,7 @@ export default function UserDashboard() {
                     <tr>
                       <th>Doctor</th>
                       <th>Hospital</th>
-                      <th>Medicine</th>
+                      <th>Medicine</th> {/* Changed back to Medicine */}
                       <th>Feedback</th>
                       <th>Location</th>
                     </tr>
@@ -636,7 +657,7 @@ export default function UserDashboard() {
                       >
                         <td>{meeting.doctor || "N/A"}</td>
                         <td>{meeting.hospital || "N/A"}</td>
-                        <td>{meeting.medicine || "N/A"}</td>
+                        <td>{meeting.medicine || "N/A"}</td> {/* Changed back to medicine */}
                         <td>{meeting.feedback || "N/A"}</td>
                         <td>{meeting.location || "N/A"}</td>
                       </motion.tr>
