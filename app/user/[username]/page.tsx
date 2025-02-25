@@ -105,7 +105,7 @@ export default function UserDashboard() {
 
     fetchDoctors();
     fetchMedicines();
-  }, []);
+  }, [doctors,chemists]);
 
   // Filter doctors based on the location entered in the meeting form
   const filteredDoctors = doctors.filter((doctor) =>
