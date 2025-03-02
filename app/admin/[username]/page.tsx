@@ -33,6 +33,8 @@ interface Meeting {
 
 export default function AdminDashboard() {
   const { username } = useParams();
+  const name = String(username).replace(/[^a-zA-Z\s]/g, " ")
+
   const [users, setUsers] = useState<User[]>([]);
 
   // const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
@@ -165,7 +167,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-center">
-        Welcome, Admin {username}!
+        Welcome :  {name}
       </h1>
 
       <div className="flex items-center justify-center gap-6">

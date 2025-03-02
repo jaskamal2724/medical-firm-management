@@ -47,12 +47,13 @@ const LoginForm = () => {
         password
       );
       const user = userCredential.user;
+      // console.log(user)
 
       if (user) {
-
+        const name = user.email?.split("@")[0]
         toast.success("Login Success",{
           autoClose:1000,
-          onClose:()=>router.push(`/admin/${user.displayName || user.email}`)
+          onClose:()=>router.push(`/admin/${name}`)
         });
         
       }
