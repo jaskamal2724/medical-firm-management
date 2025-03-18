@@ -42,7 +42,7 @@ const Navigation = () => {
          
           <li>
             {user && <p onClick={handlesignout}>sign out</p>}
-            {!user && <p>sign in</p>}
+            {!user && ""}
           </li>
         </ul>
         <button onClick={toggleTheme} className="btn btn-ghost btn-circle">

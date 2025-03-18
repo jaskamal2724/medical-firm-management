@@ -8,6 +8,7 @@ import { db } from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "./ThemeProvider";
 
 export interface Dataitem {
   key: string;
@@ -15,6 +16,8 @@ export interface Dataitem {
 }
 
 const LoginForm = () => {
+
+  const {theme} = useTheme();
   const [loading, setLoading] = useState(false);
 
   const [email, setemail] = useState("");
@@ -86,27 +89,27 @@ const LoginForm = () => {
       >
         <div className="form-control">
           <label htmlFor="email" className="label">
-            <span className="label-text">Unique ID :</span>
+            <span className="label-text text-black">Email :</span>
           </label>
           <input
             type="text"
             id="email"
             value={email}
             onChange={(e) => setemail(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input input-bordered w-full ${theme=='dark' ? 'bg-gray-400 text-white' : 'bg-white text-black'}`}
             required
           />
         </div>
         <div className="form-control mt-4">
           <label htmlFor="password" className="label">
-            <span className="label-text">Password:</span>
+            <span className="label-text text-black">Password:</span>
           </label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input input-bordered w-full ${theme=='dark' ? 'bg-gray-400 text-white' : 'bg-white text-black'}`}
             required
           />
         </div>
