@@ -323,7 +323,7 @@ export default function UserDashboard() {
       console.log("Doctor details updated successfully!");
     } 
     catch (error) {
-      
+      console.log(error)
     }
   };
 
@@ -331,7 +331,8 @@ export default function UserDashboard() {
     console.log(newDoctor)
   }
 
-  const handleDelete = async (id: string) => {};
+  const handleDelete = async (id: string) => { console.log(id)};
+  
   // Fetch doctors and medicines from Firestore on mount
   useEffect(() => {
     const fetchDoctors = async () => {
