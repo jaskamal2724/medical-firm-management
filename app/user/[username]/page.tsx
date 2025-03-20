@@ -366,7 +366,7 @@ export default function UserDashboard() {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        let doctors = docSnap.data().doctors || [];
+        const doctors = docSnap.data().doctors || [];
 
         // Find index of the doctor to update
         const index = doctors.findIndex(
@@ -468,7 +468,7 @@ export default function UserDashboard() {
       const docref = doc(db, "chemists", "list");
       const docsnap = await getDoc(docref);
       if (docsnap.exists()) {
-        let chemists = docsnap.data().chemists || [];
+        const chemists = docsnap.data().chemists || [];
         const index = chemists.findIndex((d: { id: string }) => d.id == id);
 
         if (index !== -1) {
