@@ -370,7 +370,7 @@ export default function UserDashboard() {
 
         // Find index of the doctor to update
         const index = doctors.findIndex(
-          (doctor: { id: any }) => doctor.id === id
+          (doctor: { id: string }) => doctor.id === id
         );
 
         if (index !== -1) {
