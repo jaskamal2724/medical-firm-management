@@ -31,6 +31,7 @@ interface Doctor {
   contact: string;
   location: string;
   anniversary: string;
+  addedby:string;
 }
 
 interface Chemist {
@@ -54,6 +55,8 @@ export default function UserDashboard() {
   const name = String(username).replace("%20", " ");
   const router = useRouter();
   const [editable, setEditable] = useState(false);
+  const [addingdoctor, setAddingdoctor] = useState(false);
+  const [addingmeet, setAddingmeet]=useState(false)
 
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -70,24 +73,26 @@ export default function UserDashboard() {
     name: `${username}`,
   });
   const [newChemist, setNewChemist] = useState({
+    id: "",
     name: "",
     owner: "",
     contact: "",
     location: "",
   });
   const [newDoctor, setNewDoctor] = useState({
+    id: "",
     name: "",
     specialty: "",
     hospital: "",
     contact: "",
     location: "",
     anniversary: "",
+    addedby:"",
   });
   const [showForm, setShowForm] = useState<"meeting" | "chemist" | "doctor">(
     "meeting"
   );
 
-  
   // Filter doctors based on the location entered in the meeting form
   const filteredDoctors = doctors.filter((doctor) =>
     newMeeting.location
@@ -105,6 +110,7 @@ export default function UserDashboard() {
   // Add meeting
   const addMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAddingmeet(true)
     const updateMeetings = {
       ...newMeeting,
       id: meetings.length + 1,
@@ -115,6 +121,17 @@ export default function UserDashboard() {
     setMeetings([...meetings, updateMeetings]);
 
     try {
+      const meetref = doc(db, "meeting-data", "list");
+      const meetsnap = await getDoc(meetref);
+
+      if (meetsnap.exists()) {
+        const data = meetsnap.data().meetings || [];
+        const updatedata = [...data, newMeeting];
+        await updateDoc(meetref, { meetings: updatedata });
+      } else {
+        await setDoc(meetref, { meetings: [newMeeting] });
+      }
+
       const userRef = doc(db, "users", `${username}`);
       const userSnap = await getDoc(userRef);
 
@@ -167,6 +184,7 @@ export default function UserDashboard() {
       date: Date.now(),
       name: `${username}`,
     });
+    setAddingmeet(false)
   };
 
   // Add chemist
@@ -220,21 +238,25 @@ export default function UserDashboard() {
       });
     }
 
-    setNewChemist({ name: "", owner: "", contact: "", location: "" });
+    setNewChemist({ id: "", name: "", owner: "", contact: "", location: "" });
   };
 
   // Add doctor
   const addDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
-    const doctorWithId = { ...newDoctor, id: nanoid() };
+    setAddingdoctor(true);
+
+    const doctorWithId = { ...newDoctor, id: nanoid(),addedby:name+"\t(employee)" };
     setDoctors((prev) => [...prev, doctorWithId]);
 
     try {
-      const doctorsRef = doc(db, "doctors", "list");
+      const doctorsRef = doc(db, "doctors-test", "list");
       const doctorsSnap = await getDoc(doctorsRef);
 
       if (doctorsSnap.exists()) {
-        const existingData = Array.isArray(doctorsSnap.data().doctors)?doctorsSnap.data().doctors:[doctorsSnap.data().doctors];
+        const existingData = Array.isArray(doctorsSnap.data().doctors)
+          ? doctorsSnap.data().doctors
+          : [doctorsSnap.data().doctors];
         const updatedDoctors = [...existingData, doctorWithId];
         await updateDoc(doctorsRef, { doctors: updatedDoctors });
         toast.success("Doctor added", {
@@ -260,6 +282,7 @@ export default function UserDashboard() {
         });
         console.log("New document created with doctor");
       }
+      setAddingdoctor(false);
     } catch (error) {
       console.error("Error adding doctor: ", error);
       setDoctors((prev) => prev.filter((d) => d.id !== doctorWithId.id));
@@ -275,12 +298,14 @@ export default function UserDashboard() {
     }
 
     setNewDoctor({
+      id: "",
       name: "",
       specialty: "",
       hospital: "",
       contact: "",
       location: "",
       anniversary: "",
+      addedby:"",
     });
   };
 
@@ -290,62 +315,221 @@ export default function UserDashboard() {
       .catch((error) => console.error("Error signing out: ", error));
   };
 
-  const handlechange = (e: { target: { name: string; value: string } }) => {
+  const handlechangeDoctorEditvalues = (e: {
+    target: { name: string; value: string };
+  }) => {
     const { name, value } = e.target;
     setNewDoctor((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlecancel = () => {
+  const handleChangechemistEditvalues = (e: {
+    target: { name: string; value: string };
+  }) => {
+    const { name, value } = e.target;
+    setNewChemist((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlecancelDoctorEdit = () => {
     setEditable(false);
     setNewDoctor({
+      id: "",
       name: "",
       specialty: "",
       hospital: "",
       contact: "",
       location: "",
       anniversary: "",
+      addedby:""
     });
   };
 
-  const handleEdit = async (id: string) => {
+  const handleEditDoctor = async (id: string) => {
     try {
       setEditable(true);
-      const docRef = doc(db, "doctors", "list");
+      const docRef = doc(db, "doctors-test", "list");
       const docSnap = await getDoc(docRef);
-  
+
       if (docSnap.exists()) {
         const doctorData = docSnap.data().doctors;
         const editable = doctorData.find((d: { id: string }) => d.id === id);
-        console.log(editable);
         setNewDoctor(editable);
       }
-      await updateDoc(docRef, { doctors: newDoctor });
-      console.log("Doctor details updated successfully!");
-    } 
-    catch (error) {
-      console.log(error)
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const handleeditchanges=()=>{
-    console.log(newDoctor)
-  }
+  const handleEditChangesDoctor = async (id: string) => {
+    const docRef = doc(db, "doctors-test", "list");
 
-  const handleDelete = async (id: string) => { console.log(id)};
-  
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        let doctors = docSnap.data().doctors || [];
+
+        // Find index of the doctor to update
+        const index = doctors.findIndex(
+          (doctor: { id: any }) => doctor.id === id
+        );
+
+        if (index !== -1) {
+          // Update only the necessary fields
+          doctors[index] = { ...doctors[index], ...newDoctor };
+
+          // Update Firestore document
+          await updateDoc(docRef, { doctors });
+          toast.success("doctor updated success",{autoClose:1000})
+          console.log("Doctor details updated successfully!");
+        } else {
+          toast.error("doctor not found",{autoClose:1000})
+          console.log("Doctor not found!");
+        }
+      } else {
+        toast.error("failed to edit",{autoClose:1000})
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error updating doctor:", error);
+    }
+
+    setEditable(false);
+    setNewDoctor({
+      id: "",
+      name: "",
+      specialty: "",
+      hospital: "",
+      contact: "",
+      location: "",
+      anniversary: "",
+      addedby:""
+    });
+    fetchDoctors();
+  };
+
+  const handleDeleteDoctor = async (id: string) => {
+    try {
+      const docref = doc(db, "doctors-test", "list");
+      const docSnap = await getDoc(docref);
+
+      if (docSnap.exists()) {
+        let doctors = docSnap.data().doctors;
+        doctors = doctors.filter((d: { id: string }) => d.id !== id);
+        await updateDoc(docref, { doctors });
+        toast.success("deleted",{autoClose:1000})
+        console.log("deleted successfully");
+        fetchDoctors();
+      } else {
+        toast.error("not deleted",{autoClose:1000})
+        console.log("not deleted");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    const doctorsRef = doc(db, "doctors-test", "list");
+    const doctorsSnap = await getDoc(doctorsRef);
+
+    if (doctorsSnap.exists()) {
+      const data = doctorsSnap.data().doctors || [];
+      setDoctors(Array.isArray(data) ? data : [data]);
+    }
+  };
+
+  const fetchchemists = async () => {
+    const chemistsref = doc(db, "chemists", "list");
+    const chemistsSnap = await getDoc(chemistsref);
+
+    if (chemistsSnap.exists()) {
+      const data = (await chemistsSnap.data().chemists) || [];
+      setChemists(data);
+    }
+  };
+
+  const handleChemistEdit = async (id: string) => {
+    try {
+      setEditable(true);
+      const docref = doc(db, "chemists", "list");
+      const docsnap = await getDoc(docref);
+      if (docsnap.exists()) {
+        const data = docsnap.data().chemists;
+        const editable = data.find((d: { id: string }) => d.id == id);
+        setNewChemist(editable);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChemistEditChanges = async (id: string) => {
+    try {
+      const docref = doc(db, "chemists", "list");
+      const docsnap = await getDoc(docref);
+      if (docsnap.exists()) {
+        let chemists = docsnap.data().chemists || [];
+        const index = chemists.findIndex((d: { id: string }) => d.id == id);
+
+        if (index !== -1) {
+          chemists[index] = { ...chemists[index], ...newChemist };
+          await updateDoc(docref, { chemists });
+          toast.success("chemist edited success",{autoClose: 1000})
+        } else {
+          console.log("chemist not found");
+          toast.error("chemist not found",{autoClose:1000})
+        }
+      } else {
+        console.log("No such document");
+        toast.error("failed to edit",{autoClose:1000})
+      }
+      setEditable(false);
+      setNewChemist({
+        id: "",
+        name: "",
+        owner: "",
+        contact: "",
+        location: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChemistDelete = async (id: string) => {
+    try {
+      const docref = doc(db, "chemists", "list");
+      const docSnap = await getDoc(docref);
+
+      if (docSnap.exists()) {
+        let chemists = docSnap.data().chemists;
+        chemists = chemists.filter((d: { id: string }) => d.id !== id);
+        await updateDoc(docref, { chemists });
+        toast.success("deleted",{autoClose:1000})
+        console.log("deleted successfully");
+        fetchchemists()
+      } else {
+        toast.error("not deleted",{autoClose:1000})
+        console.log("not deleted");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlecancelChemistEdit = () => {
+    setEditable(false);
+    setNewChemist({
+      id: "",
+      name: "",
+      owner: "",
+      contact: "",
+      location: "",
+    });
+  };
+
   // Fetch doctors and medicines from Firestore on mount
   useEffect(() => {
-    const fetchDoctors = async () => {
-      const doctorsRef = doc(db, "doctors", "list");
-      const doctorsSnap = await getDoc(doctorsRef);
-
-      if (doctorsSnap.exists()) {
-        const data = doctorsSnap.data().doctors || [];
-        setDoctors(Array.isArray(data) ? data : [data]);
-
-      }
-    };
-
     const fetchMedicines = async () => {
       const medicinesRef = doc(db, "medicines", "list"); // Assuming medicines are stored in medicines/list
       const medicinesSnap = await getDoc(medicinesRef);
@@ -353,16 +537,6 @@ export default function UserDashboard() {
       if (medicinesSnap.exists()) {
         const data = medicinesSnap.data().medicines || [];
         setMedicines(data);
-      }
-    };
-
-    const fetchchemists = async () => {
-      const chemistsref = doc(db, "chemists", "list");
-      const chemistsSnap = await getDoc(chemistsref);
-
-      if (chemistsSnap.exists()) {
-        const data = (await chemistsSnap.data().chemists) || [];
-        setChemists(data);
       }
     };
 
@@ -408,85 +582,154 @@ export default function UserDashboard() {
 
       {editable ? (
         <div>
-          <form  className="bg-blue-100 p-6 rounded-lg shadow-md w-96 mx-auto">
-            <h2 className="text-xl font-bold mb-4 text-center">Edit Doctor</h2>
-            <div className="flex flex-col items-center justify-center">
-              <label htmlFor="">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={newDoctor?.name}
-                className="border p-2 rounded-lg  mb-2"
-                placeholder="Doctor Name"
-                required
-                onChange={handlechange}
-              />
-              <label htmlFor="">Specialty</label>
-              <input
-                type="text"
-                name="specialty"
-                value={newDoctor.specialty}
-                className="border p-2 rounded-lg  mb-2"
-                placeholder="Specialty"
-                required
-                onChange={handlechange}
-              />
-              <label htmlFor="">Hospital</label>
-              <input
-                type="text"
-                name="hospital"
-                value={newDoctor.hospital}
-                className="border p-2 rounded-lg  mb-2"
-                placeholder="Hospital"
-                required
-                onChange={handlechange}
-              />
-              <label htmlFor="">Contact</label>
-              <input
-                type="text"
-                name="contact"
-                value={newDoctor.contact}
-                className="border p-2 rounded-lg  mb-2"
-                placeholder="Contact"
-                required
-                onChange={handlechange}
-              />
-              <label htmlFor="">Anniversary</label>
-              <input
-                type="text"
-                name="anniversary"
-                value={newDoctor.anniversary}
-                className="border p-2 rounded-lg  mb-2"
-                onChange={handlechange}
-              />
-              <label htmlFor="">location</label>
-              <input
-                type="text"
-                name="location"
-                value={newDoctor.location}
-                className="border p-2 rounded-lg  mb-2"
-                placeholder="Location"
-                required
-                onChange={handlechange}
-              />
-            </div>
-            <div className="flex items-center justify-center gap-7">
-              <button
-                onClick={handleeditchanges}
-                type="button"
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={handlecancel}
-                type="button"
-                className=" bg-gray-300 p-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+          {showForm == "doctor" && (
+            <form className="bg-blue-100 p-6 rounded-lg shadow-md w-96 mx-auto">
+              <h2 className="text-xl font-bold mb-4 text-center">
+                Edit Doctor
+              </h2>
+              <div className="flex flex-col items-center justify-center">
+                <label htmlFor="">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={newDoctor?.name}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Doctor Name"
+                  required
+                  onChange={handlechangeDoctorEditvalues}
+                />
+                <label htmlFor="">Specialty</label>
+                <input
+                  type="text"
+                  name="specialty"
+                  value={newDoctor.specialty}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Specialty"
+                  required
+                  onChange={handlechangeDoctorEditvalues}
+                />
+                <label htmlFor="">Hospital</label>
+                <input
+                  type="text"
+                  name="hospital"
+                  value={newDoctor.hospital}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Hospital"
+                  required
+                  onChange={handlechangeDoctorEditvalues}
+                />
+                <label htmlFor="">Contact</label>
+                <input
+                  type="text"
+                  name="contact"
+                  value={newDoctor.contact}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Contact"
+                  required
+                  onChange={handlechangeDoctorEditvalues}
+                />
+                <label htmlFor="">Anniversary</label>
+                <input
+                  type="text"
+                  name="anniversary"
+                  value={newDoctor.anniversary}
+                  className="border p-2 rounded-lg  mb-2"
+                  onChange={handlechangeDoctorEditvalues}
+                />
+                <label htmlFor="">location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={newDoctor.location}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Location"
+                  required
+                  onChange={handlechangeDoctorEditvalues}
+                />
+              </div>
+              <div className="flex items-center justify-center gap-7">
+                <button
+                  onClick={() => handleEditChangesDoctor(newDoctor.id)}
+                  type="button"
+                  className="bg-blue-500 text-white p-2 rounded"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={handlecancelDoctorEdit}
+                  type="button"
+                  className=" bg-gray-300 p-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+          {showForm == "chemist" && (
+            <form className="bg-blue-100 p-6 rounded-lg shadow-md w-96 mx-auto">
+              <h2 className="text-xl font-bold mb-4 text-center">
+                Edit Chemist
+              </h2>
+              <div className="flex flex-col items-center justify-center">
+                <label htmlFor="">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={newChemist?.name}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Chemist Name"
+                  required
+                  onChange={handleChangechemistEditvalues}
+                />
+                <label htmlFor="">Owner</label>
+                <input
+                  type="text"
+                  name="owner"
+                  value={newChemist.owner}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Owner"
+                  required
+                  onChange={handleChangechemistEditvalues}
+                />
+                <label htmlFor="">Contact</label>
+                <input
+                  type="text"
+                  name="contact"
+                  value={newChemist.contact}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Contact"
+                  required
+                  onChange={handleChangechemistEditvalues}
+                />
+                <label htmlFor="">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={newChemist.location}
+                  className="border p-2 rounded-lg  mb-2"
+                  placeholder="Location"
+                  required
+                  onChange={handleChangechemistEditvalues}
+                />
+              </div>
+              <div className="flex items-center justify-center gap-7">
+                <button
+                  onClick={() => handleChemistEditChanges(newChemist.id)}
+                  type="button"
+                  className="bg-blue-500 text-white p-2 rounded"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={handlecancelChemistEdit}
+                  type="button"
+                  className=" bg-gray-300 p-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       ) : (
         <div>
@@ -549,7 +792,6 @@ export default function UserDashboard() {
                         <span className="label-text">Doctor</span>
                       </label>
                       <select
-                      
                         id="doctor"
                         value={newMeeting.doctor}
                         onChange={(e) =>
@@ -564,11 +806,12 @@ export default function UserDashboard() {
                         <option value="" disabled>
                           Select a Doctor
                         </option>
-                        {filteredDoctors.length>0 && filteredDoctors.map((doctor) => (
-                          <option key={doctor.id} value={doctor.name}>
-                            {doctor.name} ({doctor.specialty})
-                          </option>
-                        ))}
+                        {filteredDoctors.length > 0 &&
+                          filteredDoctors.map((doctor) => (
+                            <option key={doctor.id} value={doctor.name}>
+                              {doctor.name} ({doctor.specialty})
+                            </option>
+                          ))}
                       </select>
                     </div>
                     <div className="form-control">
@@ -713,7 +956,11 @@ export default function UserDashboard() {
                       ></textarea>
                     </div>
                     <button type="submit" className="btn btn-primary w-full">
-                      Add Meeting
+                    {addingmeet ? (
+                        <span className="loading loading-spinner loading-xl"></span>
+                      ) : (
+                        "Add Meetings"
+                      )}
                     </button>
                   </form>
                 ) : showForm === "chemist" ? (
@@ -907,7 +1154,11 @@ export default function UserDashboard() {
                       />
                     </div>
                     <button type="submit" className="btn btn-primary w-full">
-                      Add Doctor
+                      {addingdoctor ? (
+                        <span className="loading loading-spinner loading-xl"></span>
+                      ) : (
+                        "Add Doctor"
+                      )}
                     </button>
                   </form>
                 )}
@@ -978,6 +1229,7 @@ export default function UserDashboard() {
                               <th>Contact</th>
                               <th>Location</th>
                               <th>Anniversary</th>
+                              <th>Added By</th>
                               <th>Edit</th>
                               <th>Delete</th>
                             </tr>
@@ -996,15 +1248,16 @@ export default function UserDashboard() {
                                 <td>{item.contact || "N/A"}</td>
                                 <td>{item.location || "N/A"}</td>
                                 <td>{item.anniversary || "N/A"}</td>
+                                <td>{item.addedby || "N/A"}</td>
                                 <td
                                   className="cursor-pointer"
-                                  onClick={() => handleEdit(item.id)}
+                                  onClick={() => handleEditDoctor(item.id)}
                                 >
                                   <Pencil />
                                 </td>
                                 <td
                                   className="cursor-pointer"
-                                  onClick={() => handleDelete(item.id)}
+                                  onClick={() => handleDeleteDoctor(item.id)}
                                 >
                                   <Trash2 />
                                 </td>
@@ -1033,6 +1286,8 @@ export default function UserDashboard() {
                               <th>Owner</th>
                               <th>Contact</th>
                               <th>Location</th>
+                              <th>Edit</th>
+                              <th>Delete</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1048,6 +1303,18 @@ export default function UserDashboard() {
                                 <td>{item.owner || "N/A"}</td>
                                 <td>{item.contact || "N/A"}</td>
                                 <td>{item.location || "N/A"}</td>
+                                <td
+                                  className="cursor-pointer"
+                                  onClick={() => handleChemistEdit(item.id)}
+                                >
+                                  <Pencil />
+                                </td>
+                                <td
+                                  className="cursor-pointer"
+                                  onClick={() => handleChemistDelete(item.id)}
+                                >
+                                  <Trash2 />
+                                </td>
                               </motion.tr>
                             ))}
                           </tbody>

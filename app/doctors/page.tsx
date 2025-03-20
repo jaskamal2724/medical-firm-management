@@ -14,10 +14,12 @@ interface Doctor {
   hospital: string;
   contact: string;
   location: string;
-  dob: string;
+  anniversary: string;
+  addedby: string;
 }
 
 export default function DoctorsPage() {
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [newDoctor, setNewDoctor] = useState({
     id: "",
@@ -26,13 +28,14 @@ export default function DoctorsPage() {
     hospital: "",
     contact: "",
     location: "",
-    dob: "",
+    anniversary: "",
+    addedby: "",
   });
 
   // Fetch doctors from Firestore on mount
   useEffect(() => {
     const fetchDoctors = async () => {
-      const doctorsRef = doc(db, "doctors", "list"); // Single document to store all doctors
+      const doctorsRef = doc(db, "doctors-test", "list"); // Single document to store all doctors
       const doctorsSnap = await getDoc(doctorsRef);
 
       if (doctorsSnap.exists()) {
@@ -52,14 +55,15 @@ export default function DoctorsPage() {
 
     const doctorWithId = {
       ...newDoctor,
-      id: nanoid(), // Generate a unique ID for each doctor
+      id: nanoid(),
+      addedby:"(admin)"
     };
 
     // Optimistically update the UI
     setDoctors((prev) => [...prev, doctorWithId]);
 
     try {
-      const doctorsRef = doc(db, "doctors", "list");
+      const doctorsRef = doc(db, "doctors-test", "list");
       const doctorsSnap = await getDoc(doctorsRef);
 
       if (doctorsSnap.exists()) {
@@ -85,13 +89,13 @@ export default function DoctorsPage() {
       hospital: "",
       contact: "",
       location: "",
-      dob: "",
+      anniversary: "",
+      addedby:"",
     });
   };
 
   return (
     <div className="space-y-6 max-w-xl mx-auto px-4 py-8">
-      {/* Page Title */}
       <motion.h1
         className="text-3xl font-bold text-center"
         initial={{ opacity: 0, y: -20 }}
@@ -102,7 +106,6 @@ export default function DoctorsPage() {
       </motion.h1>
 
       <div className="flex flex-col items-center justify-center gap-7">
-        {/* Add Doctor Form */}
         <div className="card bg-base-200 shadow-xl">
           <div className="card-body">
             <div className="flex justify-center items-center">
@@ -111,7 +114,6 @@ export default function DoctorsPage() {
 
             <form onSubmit={addDoctor} className="space-y-4">
               <div className="flex items-center justify-center gap-6">
-                {/* name */}
                 <div className="form-control">
                   <label htmlFor="name" className="label">
                     <span className="label-text">Doctor Name</span>
@@ -129,7 +131,6 @@ export default function DoctorsPage() {
                   />
                 </div>
 
-                {/* // specialty */}
                 <div className="form-control">
                   <label htmlFor="specialty" className="label">
                     <span className="label-text">Specialty</span>
@@ -148,7 +149,6 @@ export default function DoctorsPage() {
                 </div>
               </div>
 
-              {/* // hospital */}
               <div className="form-control">
                 <label htmlFor="hospital" className="label">
                   <span className="label-text">Hospital</span>
@@ -167,7 +167,6 @@ export default function DoctorsPage() {
               </div>
 
               <div className="flex items-center justify-center gap-6">
-                {/* // contact */}
                 <div className="form-control">
                   <label htmlFor="contact" className="label">
                     <span className="label-text">Contact</span>
@@ -185,17 +184,19 @@ export default function DoctorsPage() {
                   />
                 </div>
 
-                {/* // Birthday */}
                 <div className="form-control">
                   <label htmlFor="contact" className="label">
                     <span className="label-text">Birthday</span>
                   </label>
                   <input
                     type="text"
-                    id="dob"
-                    value={newDoctor.dob}
+                    id="anniversary"
+                    value={newDoctor.anniversary}
                     onChange={(e) =>
-                      setNewDoctor({ ...newDoctor, dob: e.target.value })
+                      setNewDoctor({
+                        ...newDoctor,
+                        anniversary: e.target.value,
+                      })
                     }
                     className="input input-bordered w-full"
                     placeholder="24 March 1997"
@@ -204,7 +205,6 @@ export default function DoctorsPage() {
                 </div>
               </div>
 
-              {/* // location */}
               <div className="form-control">
                 <label htmlFor="location" className="label">
                   <span className="label-text">Location</span>
@@ -247,8 +247,9 @@ export default function DoctorsPage() {
                       <th>Specialty</th>
                       <th>Hospital</th>
                       <th>Contact</th>
-                      <th>Birthday</th>
+                      <th>Anniversary</th>
                       <th>Location</th>
+                      <th>Added By</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -264,8 +265,9 @@ export default function DoctorsPage() {
                         <td>{doctor.specialty}</td>
                         <td>{doctor.hospital}</td>
                         <td>{doctor.contact}</td>
-                        <td>{doctor.dob}</td>
+                        <td>{doctor.anniversary}</td>
                         <td>{doctor.location}</td>
+                        <td>{doctor.addedby}</td>
                       </motion.tr>
                     ))}
                   </tbody>

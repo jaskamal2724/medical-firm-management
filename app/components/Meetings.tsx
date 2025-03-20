@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
+import React, {  useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,12 +8,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { motion } from "framer-motion"
-import { Input } from "@/components/ui/input"
-import { Search, SortAsc, SortDesc } from "lucide-react"
-import { nanoid } from "nanoid"
-
+} from "@/components/ui/table";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Search, SortAsc, SortDesc } from "lucide-react";
 
 interface Meeting {
   medicine: string;
@@ -22,54 +20,53 @@ interface Meeting {
   hospital: string;
   feedback: string;
   location: string;
-  date:number;
-  name:string
+  date: number;
+  name: string;
 }
 
 interface MeetingsTableProps {
-  meetings: Meeting[]
-  userId?: string
+  meetings: Meeting[];
+  userId?: string;
 }
 
 const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
-  const [sortField, setSortField] = useState<keyof Meeting>("date")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [searchTerm, setSearchTerm] = useState("")
+  const [sortField, setSortField] = useState<keyof Meeting>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // to get document name 
+  // to get document name
   
-
   const filteredMeetings = meetings
-    .filter(meeting => 
-      userId ? meeting.id === userId : true
-    )
-    .filter(meeting =>
-      Object.values(meeting).some(value =>
+    .filter((meeting) => (userId ? meeting.id === userId : true))
+    .filter((meeting) =>
+      Object.values(meeting).some((value) =>
         value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
     )
     .sort((a, b) => {
-      if (sortDirection === "asc") {
-        return a[sortField] > b[sortField] ? 1 : -1
+      if (sortDirection === "desc") {
+        return a[sortField] > b[sortField] ? -1 : 1;
       }
-      return a[sortField] < b[sortField] ? 1 : -1
-    })
+      return a[sortField] < b[sortField] ? -1 : 1;
+    });  
 
   const toggleSort = (field: keyof Meeting) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection("asc");
     }
-  }
+  };
 
   const SortIcon = ({ field }: { field: keyof Meeting }) => {
-    if (sortField !== field) return null
-    return sortDirection === "asc" ? 
-      <SortAsc className="inline h-4 w-4 ml-1" /> : 
+    if (sortField !== field) return null;
+    return sortDirection === "asc" ? (
+      <SortAsc className="inline h-4 w-4 ml-1" />
+    ) : (
       <SortDesc className="inline h-4 w-4 ml-1" />
-  }
+    );
+  };
 
   return (
     <motion.div
@@ -97,19 +94,19 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort("date")}
               >
                 Date <SortIcon field="date" />
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort("doctor")}
               >
                 Doctor <SortIcon field="doctor" />
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggleSort("medicine")}
               >
@@ -117,7 +114,7 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
               </TableHead>
               <TableHead>Notes</TableHead>
               {!userId && (
-                <TableHead 
+                <TableHead
                   className="cursor-pointer hover:bg-gray-50"
                   onClick={() => toggleSort("id")}
                 >
@@ -128,20 +125,24 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredMeetings.map((meeting) => (
+            {filteredMeetings.map((meeting, index) => (
               <motion.tr
-                key={nanoid()}
+                key={index}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="hover:bg-gray-50"
               >
-                <TableCell>{new Date(meeting.date).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(meeting.date).toLocaleDateString()}
+                </TableCell>
                 <TableCell className="font-medium">{meeting.doctor}</TableCell>
                 <TableCell>{meeting.medicine}</TableCell>
                 <TableCell>{meeting.feedback}</TableCell>
                 {!userId && <TableCell>{meeting.location}</TableCell>}
-                <TableCell>{meeting.name.replace(/[^a-zA-Z\s]/g, " ")}</TableCell>
+                <TableCell>
+                  {meeting.name.replace(/[^a-zA-Z\s]/g, " ")}
+                </TableCell>
               </motion.tr>
             ))}
           </TableBody>
@@ -149,12 +150,10 @@ const MeetingsTable = ({ meetings, userId }: MeetingsTableProps) => {
       </div>
 
       {filteredMeetings.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          No meetings found
-        </div>
+        <div className="text-center py-8 text-gray-500">No meetings found</div>
       )}
     </motion.div>
-  )
-}
+  );
+};
 
 export default MeetingsTable;
